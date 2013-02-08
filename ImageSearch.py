@@ -69,7 +69,10 @@ class ImageSearch:
 		for y in range(0,patHeight, Yinterval):
 			patPixelArray.append(patternPixels[patWidth-1,y])
 
-		# make source pixel array
+		# make source pixel array as many times as needed until a match is found or
+		# until we run out of places to try the pattern image against it. 
+		# it starts at x=0 and y=0, moving down in the y direction as far as it can before
+		# moving over the next x pixel and starting over. Not very optimized but its something.
 		column = 0
 		row = 0
 		for x in range(0,sourceWidth-patWidth, Xinterval):
