@@ -30,24 +30,28 @@ class ImageSearch:
 			for y in range(0, sourceSize[1]):
 				sourcePixelArray.append(sourcePixels[x,y])
 
-		return patPixelArray == sourcePixelArray
+		percentage = self.array_match_percentage(patPixelArray, sourcePixelArray)
+
+		if(percentage > .5):
+			return "MATCHES", percentage*100, "percent."
+		else:
+			print "Does Not Match", percentage*100, "percent"
 
 	def key_point_match(self, pattern, source):
 		patternPixels = pattern.load()
 		sourcePixels = source.load()
 
-		patWidth = pattern.size[0] - 1
-		patHeight = pattern.size[1] - 1
-		Xinterval = int((patWidth/100) - 1)
-		Yinterval = int((patHeight/100) - 1)
+		patWidth = pattern.size[0]
+		patHeight = pattern.size[1]
 
-		sourceWidth = source.size[0] - 1
-		sourceHeight = source.size[1] - 1
+		Xinterval = int((patWidth/10))-1
+		Yinterval = int((patHeight/10))-1
+
+		sourceWidth = source.size[0]
+		sourceHeight = source.size[1]
 
 		patPixelArray = []
-		sourcePixelArray = []
-
-
+		
 		# Pattern Image
 		# get very top row of pattern image 
 		for x in range(0,patWidth, Xinterval):
@@ -55,7 +59,7 @@ class ImageSearch:
 
 		# get very bottom pattern image 
 		for x in range(0,patWidth, Xinterval):
-			patPixelArray.append(patternPixels[x,patHeight])
+			patPixelArray.append(patternPixels[x,patHeight-1])
 
 		# get very left column of pattern image
 		for y in range(0,patHeight, Yinterval):
@@ -63,35 +67,62 @@ class ImageSearch:
 
 		# get very right column of pattern image
 		for y in range(0,patHeight, Yinterval):
-			patPixelArray.append(patternPixels[patWidth,y])
+			patPixelArray.append(patternPixels[patWidth-1,y])
+
+		# make source pixel array
+		column = 0
+		row = 0
+		for x in range(0,sourceWidth-patWidth, Xinterval):
+			column += 1
+			print "Column:", column
+			for y in range(0, sourceHeight-patHeight, Yinterval):
+				row += 1
+				print "Row:", row
+				# Source Image
+				sourcePixelArray = []
+				# get very top row of source image 
+				for xx in range(x, patWidth, Xinterval):
+					sourcePixelArray.append(sourcePixels[xx,x])
+
+				# get very bottom pattern image 
+				for xx in range(x, patWidth, Xinterval):
+					sourcePixelArray.append(sourcePixels[xx,patHeight-1])
+
+				# get very left column of pattern image
+				for yy in range(y, patHeight, Yinterval):
+					sourcePixelArray.append(sourcePixels[y,yy])
+
+				# get very right column of pattern image
+				for yy in range(y, patHeight, Yinterval):
+					sourcePixelArray.append(sourcePixels[patWidth-1,yy])
+
+				percentage = self.array_match_percentage(patPixelArray, sourcePixelArray)
+
+				if(percentage > .5):
+					return "MATCHES", percentage*100, "percent."
+				else:
+					print "Does Not Match", percentage*100, "percent"
+
+		return "NO MATCH FOUND"
+
+	def array_match_percentage(self, pattern, source):
+		matches = 0.00
+		print "Size of pattern array", len(pattern)
+		print "Size of pattern array", len(source)
+		for x in range(0, len(pattern)):
+			if x < (len(source)-1):
+				if pattern[x] == source[x]:
+					matches += 1.00
+
+		return matches/(len(pattern)+0.00)
 
 
-		# Source Image
-		# get very top row of source image 
-		for x in range(0,sourceWidth, Xinterval):
-			sourcePixelArray.append(sourcePixels[x,0])
-
-		# get very bottom source image 
-		for x in range(0,sourceWidth, Xinterval):
-			sourcePixelArray.append(sourcePixels[x,sourceHeight])
-
-		# get very left column of source image
-		for y in range(0,sourceHeight, Yinterval):
-			sourcePixelArray.append(sourcePixels[0,y])
-
-		# get very right column of source image
-		for y in range(0,sourceHeight, Yinterval):
-			sourcePixelArray.append(patternPixels[patWidth,y])
-
-		return patPixelArray == sourcePixelArray
 
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
 
 # print 'Pattern Image Info: ', patSize[0]
 # print 'Source Image Info: ', sourceSize[0]
 
-if(imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image)):
-	print "MATCHES"
-else:
-	print "Does Not Match"
+#print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image)
+print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image)
 
