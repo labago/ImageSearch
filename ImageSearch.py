@@ -45,7 +45,7 @@ class ImageSearch:
 				percentage = self.percentage_of_unique_matches(uniques, sourcePixelArray, x_offset, y_offset)
 
 				if(percentage > .5):
-					return "MATCHES!!!", percentage*100, "percent."
+					return "MATCHES!!! "+str(percentage*100)+" percent."
 
 		return "Does Not Match!"
 
