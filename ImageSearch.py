@@ -11,32 +11,6 @@ class ImageSearch:
 	def match_images(self, patterns, specimens):
 		return 0
 
-	def exact_match_image(self, pattern, source):
-		patternPixels = pattern.load()
-		sourcePixels = source.load()
-		patSize = pattern.size
-		sourceSize = source.size
-
-		patPixelArray = []
-		sourcePixelArray = []
-
-		# make pattern pixel array
-		for x in range(0,patSize[0]):
-			for y in range(0, patSize[1]):
-				patPixelArray.append(patternPixels[x,y])
-
-		# make source pixel array
-		for x in range(0,sourceSize[0]):
-			for y in range(0, sourceSize[1]):
-				sourcePixelArray.append(sourcePixels[x,y])
-
-		percentage = self.array_match_percentage(patPixelArray, sourcePixelArray)
-
-		if(percentage > .5):
-			return "MATCHES", percentage*100, "percent."
-		else:
-			print "Does Not Match", percentage*100, "percent"
-
 	# try to match these two images based on important pixels
 	def key_point_match(self, pattern, source, uniques):
 		patternPixels = pattern.load()
@@ -74,19 +48,6 @@ class ImageSearch:
 					return "MATCHES!!!", percentage*100, "percent."
 
 		return "Does Not Match!"
-
-
-	# reports the the percentage match of 2 images (used for an outdated function)
-	def array_match_percentage(self, pattern, source):
-		matches = 0.00
-		print "Size of pattern array", len(pattern)
-		print "Size of pattern array", len(source)
-		for x in range(0, len(pattern)):
-			if x < (len(source)-1):
-				if pattern[x] == source[x]:
-					matches += 1.00
-
-		return matches/(len(pattern)+0.00)
 
 	# finds the unique pixels inside of the pattern picture
 	def find_unique_pixels(self, pattern):
