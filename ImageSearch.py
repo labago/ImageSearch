@@ -37,6 +37,7 @@ class ImageSearch:
 		else:
 			print "Does Not Match", percentage*100, "percent"
 
+	# try to match these two images based on important pixels
 	def key_point_match(self, pattern, source, uniques):
 		patternPixels = pattern.load()
 		sourcePixels = source.load()
@@ -75,6 +76,7 @@ class ImageSearch:
 		return "Does Not Match!"
 
 
+	# reports the the percentage match of 2 images (used for an outdated function)
 	def array_match_percentage(self, pattern, source):
 		matches = 0.00
 		print "Size of pattern array", len(pattern)
@@ -86,6 +88,7 @@ class ImageSearch:
 
 		return matches/(len(pattern)+0.00)
 
+	# finds the unique pixels inside of the pattern picture
 	def find_unique_pixels(self, pattern):
 		print "Getting unique pixel array..."
 
@@ -108,25 +111,28 @@ class ImageSearch:
 		print len(uniques), "unique pixels found"
 		return uniques
 
-
+	# determines if this pixel only appears once in the picture
 	def is_unique_pixel(self, pixel, array):
 		for x in range(0, len(array)):
 			if array[x][0] == pixel[0] and array[x][1] != pixel[1] and array[x][2] != pixel[2]:
 				return False
 		return True
 
+	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
 			if array[x][0] == pixel[0]:
 				return True
 		return False
 
+	# returns the coordinates to the pixel in the picture
 	def find_unique_in_source(self, pixel, array):
 		for x in range(0, len(array)):
 			if array[x][0] == pixel[0]:
 				return (array[x][1], array[x][2])
 		return False
 
+	# returns the percentage of pixel to pixel matches in the unique pixel array and the source picture
 	def percentage_of_unique_matches(self, uniques, source, x_offset, y_offset):
 		matches = 0.00
 
@@ -147,9 +153,4 @@ class ImageSearch:
 
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
 
-# print 'Pattern Image Info: ', patSize[0]
-# print 'Source Image Info: ', sourceSize[0]
-
-#print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image)
 print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
-
