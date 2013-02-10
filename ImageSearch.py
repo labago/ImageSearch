@@ -29,7 +29,7 @@ class ImageSearch:
 		print "Trying to match unique pixels with source image..."
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
-				source_coordinates = self.find_pixel_in_source(uniques[x], sourcePixelArray)
+				source_coordinates = self.find_pixels_in_source(uniques[x], sourcePixelArray)
 				for i in range(0, len(source_coordinates)):
 					pattern_xc = uniques[x][1]
 					pattern_yc = uniques[x][2]
@@ -69,6 +69,7 @@ class ImageSearch:
 		print "Total # of pattern pic pixels:", len(patPixelArray)
 
 		avg_pixel_value = self.get_avg_pixel_val(patPixelArray)
+		print "Avg RGB value:", avg_pixel_value
 
 		for x in range(0, len(patPixelArray)):
 			if self.is_unique_pixel(patPixelArray[x], patPixelArray, avg_pixel_value):
@@ -77,9 +78,39 @@ class ImageSearch:
 		print "Total # of unique pixels:", len(uniques)
 		return uniques
 
-	def rgb_to_hex(self, rgb):
-		return int('0x%02x%02x%02x' % rgb,16)
+	def find_unique_pixels_sorted(self, pattern):
+		patternPixels = pattern.load()
+		patSize = pattern.size
 
+		patPixelArray = []
+		uniques = []
+		
+		for x in range(0,patSize[0]):
+			for y in range(0, patSize[1]):
+				patPixelArray.append((patternPixels[x,y], x, y))
+
+		patPixelArray.sort(key=lambda x: x[0])
+
+		length = len(patPixelArray)
+		seperator = length/100
+
+		if(length > 201):
+			for x in range(0, 100):
+				uniques.append(patPixelArray[x])
+
+			for x in range((length-101), length-1):
+				uniques.append(patPixelArray[x])
+		else:
+			for x in range(0, length-1):
+				uniques.append(patPixelArray[x])
+
+		return uniques
+
+	# this needs work, doesnt work for photos cropped with GIMP
+	def rgb_to_hex(self, rgb):
+		return int('0x%02x%02x%02x' % rgb[0:3],16)
+
+	# returns the average value of all the converted RGB pixels in the picture
 	def get_avg_pixel_val(self, pattern_array):
 		total_val = 0
 		total_pixels = 0
@@ -93,20 +124,20 @@ class ImageSearch:
 	def is_unique_pixel(self, pixel, array, avg):
 		pixel_val = self.rgb_to_hex(pixel[0])
 
-		return avg < (pixel_val - 6017524) or avg == pixel_val
+		return avg < (pixel_val - (avg*.09)) or avg == pixel_val
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
-			if array[x][0] == pixel[0]:
+			if array[x][0][0:3] == pixel[0][0:3]:
 				return True
 		return False
 
 	# returns the coordinates to the pixel in the picture
-	def find_pixel_in_source(self, pixel, array):
+	def find_pixels_in_source(self, pixel, array):
 		matches = []
 		for x in range(0, len(array)):
-			if array[x][0] == pixel[0]:
+			if array[x][0][0:3] == pixel[0][0:3]:
 				matches.append((array[x][1], array[x][2]))
 		return matches
 
@@ -115,18 +146,18 @@ class ImageSearch:
 		matches = 0.00
 		source_pixels = source.load()
 
-		for x in range(0, len(uniques)):
+		for x in range(0, len(uniques), 100):
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
 
 			source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-			if source_pixel == uniques[x][0]:
+			if source_pixel == uniques[x][0][0:3]:
 				matches += 1.00
 
-		return matches/(len(uniques)+0.00)
+		return matches/((len(uniques)/100)+0.00)
 
 
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
 
-print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
+print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels_sorted(imageSearch.pattern_image))
