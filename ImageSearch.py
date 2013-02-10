@@ -123,7 +123,20 @@ class ImageSearch:
 
 		return matches/((len(uniques)/100.0)+0.00)
 
-# get the command line arguments and create the ImageSearch class with them
-imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
+# parse command line arguments as the assignment requires
 
-print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
+pattern = "NONE"
+source = "NONE"
+
+for x in range(0, len(sys.argv)):
+	if(str(sys.argv[x]) == '-p'):
+		pattern = str(sys.argv[x+1])
+	if(str(sys.argv[x]) == '-s'):
+		source = str(sys.argv[x+1])
+
+
+if(pattern != "NONE" and source != "NONE"):
+	imageSearch = ImageSearch(pattern, source)
+	print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
+else:
+	print "There was a problem parsing the command line arguments"
