@@ -19,6 +19,13 @@ class ImageSearch:
 		sourceWidth = source.size[0]
 		sourceHeight = source.size[1]
 
+		print "Width of pattern:", pattern.size[0]
+		print "Hieght of pattern:", pattern.size[1]
+
+		print "Width of source:", source.size[0]
+		print "Hieght of source:", source.size[1]
+
+
 		sourcePixelArray = []
 
 		print "Getting source pixel array..."
@@ -108,10 +115,11 @@ class ImageSearch:
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
 
-			source_pixel = source_pixels[pattern_xc, pattern_yc]
+			if(pattern_xc > 0 and pattern_yc > 0 and pattern_xc <= (source.size[0]-1) and pattern_yc <= (source.size[1]-1)):
+				source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-			if source_pixel == uniques[x][0][0:3]:
-				matches += 1.00
+				if source_pixel == uniques[x][0][0:3]:
+					matches += 1.00
 
 		return matches/((len(uniques)/100.0)+0.00)
 
