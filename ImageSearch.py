@@ -6,6 +6,7 @@ import sys
 class ImageSearch:
 
 	# constructor, takes the pattern image location string and source image location string
+	# if either image is not found, termiinate program and alert user
 	def __init__(self, pattern, source):
 		try:
 			self.pattern_image = Image.open(pattern)
@@ -35,12 +36,10 @@ class ImageSearch:
 
 		sourcePixelArray = []
 
-		print "Getting source pixel array..."
 		for x in range(0,sourceWidth):
 			for y in range(0, sourceHeight):
 				sourcePixelArray.append((sourcePixels[x,y], x, y))
 
-		print "Trying to match unique pixels with source image..."
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
 				source_coordinates = self.find_pixels_in_source(uniques[x], sourcePixelArray)
@@ -54,17 +53,12 @@ class ImageSearch:
 					x_offset = source_xc - pattern_xc
 					y_offset = source_yc - pattern_yc
 
-					print "X Offset:", x_offset
-					print "Y Offset:", y_offset
-
 					percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
 					if(percentage > .5):
 						return "MATCHES!!! "+str(percentage*100)+" percent."
-					else:
-						print "Not a match "+str(percentage*100)+" percent."
 
-		return "Does Not Match!"
+		return ""
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
