@@ -52,33 +52,11 @@ class ImageSearch:
 
 		return "Does Not Match!"
 
-	# finds the unique pixels inside of the pattern picture
+	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
+	# be first and the one with the largest will be last. It then takes to 100 least value RGB pixels and 
+	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
+	# be returned and compared
 	def find_unique_pixels(self, pattern):
-		print "Getting unique pixel array..."
-
-		patternPixels = pattern.load()
-		patSize = pattern.size
-
-		patPixelArray = []
-		uniques = []
-
-		for x in range(0,patSize[0]):
-			for y in range(0, patSize[1]):
-				patPixelArray.append((patternPixels[x,y], x, y))
-
-		print "Total # of pattern pic pixels:", len(patPixelArray)
-
-		avg_pixel_value = self.get_avg_pixel_val(patPixelArray)
-		print "Avg RGB value:", avg_pixel_value
-
-		for x in range(0, len(patPixelArray)):
-			if self.is_unique_pixel(patPixelArray[x], patPixelArray, avg_pixel_value):
-				uniques.append(patPixelArray[x])
-
-		print "Total # of unique pixels:", len(uniques)
-		return uniques
-
-	def find_unique_pixels_sorted(self, pattern):
 		patternPixels = pattern.load()
 		patSize = pattern.size
 
@@ -105,26 +83,6 @@ class ImageSearch:
 				uniques.append(patPixelArray[x])
 
 		return uniques
-
-	# this needs work, doesnt work for photos cropped with GIMP
-	def rgb_to_hex(self, rgb):
-		return int('0x%02x%02x%02x' % rgb[0:3],16)
-
-	# returns the average value of all the converted RGB pixels in the picture
-	def get_avg_pixel_val(self, pattern_array):
-		total_val = 0
-		total_pixels = 0
-		for x in range(0, len(pattern_array)):
-			total_val += self.rgb_to_hex(pattern_array[x][0])
-			total_pixels += 1
-
-		return total_val/total_pixels
-
-	# determines if this pixel only appears once in the picture
-	def is_unique_pixel(self, pixel, array, avg):
-		pixel_val = self.rgb_to_hex(pixel[0])
-
-		return avg < (pixel_val - (avg*.09)) or avg == pixel_val
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
@@ -160,4 +118,4 @@ class ImageSearch:
 
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
 
-print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels_sorted(imageSearch.pattern_image))
+print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
