@@ -53,7 +53,7 @@ class ImageSearch:
 		return "Does Not Match!"
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
-	# be first and the one with the largest will be last. It then takes to 100 least value RGB pixels and 
+	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
 	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
 	# be returned and compared
 	def find_unique_pixels(self, pattern):
@@ -79,8 +79,10 @@ class ImageSearch:
 			for x in range((length-101), length-1):
 				uniques.append(patPixelArray[x])
 		else:
-			for x in range(0, length-1):
-				uniques.append(patPixelArray[x])
+			for x in patPixelArray:
+				uniques.append(x)
+
+		print uniques
 
 		return uniques
 
@@ -113,7 +115,7 @@ class ImageSearch:
 			if source_pixel == uniques[x][0][0:3]:
 				matches += 1.00
 
-		return matches/((len(uniques)/100)+0.00)
+		return matches/((len(uniques)/100.0)+0.00)
 
 
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
