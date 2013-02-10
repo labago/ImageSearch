@@ -1,6 +1,8 @@
+#!/usr/bin/python
 from PIL import Image
 import sys
 
+# a class to represent the ImageSearcg application
 class ImageSearch:
 
 	def __init__(self, pattern, source):
@@ -12,19 +14,14 @@ class ImageSearch:
 		return 0
 
 	# try to match these two images based on important pixels
-	def key_point_match(self, pattern, source, uniques):
-		patternPixels = pattern.load()
-		sourcePixels = source.load()
+	def key_point_match(self):
+		uniques = imageSearch.find_unique_pixels()
 
-		sourceWidth = source.size[0]
-		sourceHeight = source.size[1]
+		patternPixels = self.pattern_image.load()
+		sourcePixels = self.source_image.load()
 
-		print "Width of pattern:", pattern.size[0]
-		print "Hieght of pattern:", pattern.size[1]
-
-		print "Width of source:", source.size[0]
-		print "Hieght of source:", source.size[1]
-
+		sourceWidth = self.source_image.size[0]
+		sourceHeight = self.source_image.size[1]
 
 		sourcePixelArray = []
 
@@ -50,7 +47,7 @@ class ImageSearch:
 					print "X Offset:", x_offset
 					print "Y Offset:", y_offset
 
-					percentage = self.percentage_of_unique_matches(uniques, source, x_offset, y_offset)
+					percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
 					if(percentage > .5):
 						return "MATCHES!!! "+str(percentage*100)+" percent."
@@ -63,9 +60,9 @@ class ImageSearch:
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
 	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
 	# be returned and compared
-	def find_unique_pixels(self, pattern):
-		patternPixels = pattern.load()
-		patSize = pattern.size
+	def find_unique_pixels(self):
+		patternPixels = imageSearch.pattern_image.load()
+		patSize = imageSearch.pattern_image.size
 
 		patPixelArray = []
 		uniques = []
@@ -107,15 +104,16 @@ class ImageSearch:
 		return matches
 
 	# returns the percentage of pixel to pixel matches in the unique pixel array and the source picture
-	def percentage_of_unique_matches(self, uniques, source, x_offset, y_offset):
+	def percentage_of_unique_matches(self, uniques, x_offset, y_offset):
 		matches = 0.00
-		source_pixels = source.load()
+		source_pixels = self.source_image.load()
+		source_size = self.source_image.size
 
 		for x in range(0, len(uniques), 100):
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
 
-			if(pattern_xc > 0 and pattern_yc > 0 and pattern_xc <= (source.size[0]-1) and pattern_yc <= (source.size[1]-1)):
+			if(pattern_xc > 0 and pattern_yc > 0 and pattern_xc <= (source_size[0]-1) and pattern_yc <= (source_size[1]-1)):
 				source_pixel = source_pixels[pattern_xc, pattern_yc]
 
 				if source_pixel == uniques[x][0][0:3]:
@@ -123,8 +121,12 @@ class ImageSearch:
 
 		return matches/((len(uniques)/100.0)+0.00)
 
-# parse command line arguments as the assignment requires
 
+#**************************************************#
+#**********# BEGIN EXECUTION OF PROGRAM #**********#
+#**************************************************#
+
+# parse command line arguments as the assignment requires
 pattern = "NONE"
 source = "NONE"
 
@@ -134,9 +136,9 @@ for x in range(0, len(sys.argv)):
 	if(str(sys.argv[x]) == '-s'):
 		source = str(sys.argv[x+1])
 
-
+# if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if(pattern != "NONE" and source != "NONE"):
 	imageSearch = ImageSearch(pattern, source)
-	print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
+	print imageSearch.key_point_match()
 else:
 	print "There was a problem parsing the command line arguments"
