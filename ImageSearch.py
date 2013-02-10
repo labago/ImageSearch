@@ -93,7 +93,7 @@ class ImageSearch:
 	def is_unique_pixel(self, pixel, array, avg):
 		pixel_val = self.rgb_to_hex(pixel[0])
 
-		return avg < (pixel_val - 7317524) or avg == pixel_val
+		return avg < (pixel_val - 6017524) or avg == pixel_val
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
