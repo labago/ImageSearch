@@ -116,13 +116,13 @@ class ImageSearch:
 		source_pixels = source.load()
 
 		for x in range(0, len(uniques)):
-				pattern_xc = uniques[x][1]+x_offset
-				pattern_yc = uniques[x][2]+y_offset
+			pattern_xc = uniques[x][1]+x_offset
+			pattern_yc = uniques[x][2]+y_offset
 
-				source_pixel = source_pixels[pattern_xc, pattern_yc]
+			source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-				if source_pixel == uniques[x][0]:
-					matches += 1.00
+			if source_pixel == uniques[x][0]:
+				matches += 1.00
 
 		return matches/(len(uniques)+0.00)
 
