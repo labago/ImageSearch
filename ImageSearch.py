@@ -5,9 +5,19 @@ import sys
 # a class to represent the ImageSearcg application
 class ImageSearch:
 
+	# constructor, takes the pattern image location string and source image location string
 	def __init__(self, pattern, source):
-		self.pattern_image = Image.open(pattern)
-		self.source_image = Image.open(source)
+		try:
+			self.pattern_image = Image.open(pattern)
+		except (IOError):
+			print "Pattern image not found."
+			sys.exit()
+		try:
+			self.source_image = Image.open(source)
+		except (IOError):
+			print "Source image not found."
+			sys.exit()
+
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
