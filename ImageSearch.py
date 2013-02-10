@@ -80,9 +80,7 @@ class ImageSearch:
 				uniques.append(patPixelArray[x])
 		else:
 			for x in patPixelArray:
-				uniques.append(x)
-
-		print uniques
+				uniques.append(x)		
 
 		return uniques
 
@@ -117,7 +115,7 @@ class ImageSearch:
 
 		return matches/((len(uniques)/100.0)+0.00)
 
-
+# get the command line arguments and create the ImageSearch class with them
 imageSearch = ImageSearch(str(sys.argv[1]), str(sys.argv[2]))
 
 print imageSearch.key_point_match(imageSearch.pattern_image, imageSearch.source_image, imageSearch.find_unique_pixels(imageSearch.pattern_image))
