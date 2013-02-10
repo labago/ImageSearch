@@ -29,7 +29,7 @@ class ImageSearch:
 		print "Trying to match unique pixels with source image..."
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
-				source_coordinates = self.find_unique_in_source(uniques[x], sourcePixelArray)
+				source_coordinates = self.find_pixel_in_source(uniques[x], sourcePixelArray)
 				pattern_xc = uniques[x][1]
 				pattern_yc = uniques[x][2]
 
@@ -87,7 +87,7 @@ class ImageSearch:
 		return False
 
 	# returns the coordinates to the pixel in the picture
-	def find_unique_in_source(self, pixel, array):
+	def find_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
 			if array[x][0] == pixel[0]:
 				return (array[x][1], array[x][2])
@@ -99,7 +99,7 @@ class ImageSearch:
 
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], source):
-				source_coordinates = self.find_unique_in_source(uniques[x], source)
+				source_coordinates = self.find_pixel_in_source(uniques[x], source)
 				pattern_xc = uniques[x][1]+x_offset
 				pattern_yc = uniques[x][2]+y_offset
 
