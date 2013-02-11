@@ -13,11 +13,17 @@ class ImageSearch:
 		except (IOError):
 			print "Pattern image not found."
 			sys.exit()
+		if self.pattern_image.format != "PNG":
+			self.pattern_image.save("Temp/temp_pattern_image.png")
+			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 		try:
 			self.source_image = Image.open(source)
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
+		if self.source_image.format != "PNG":
+			self.source_image.save("Temp/temp_source_image.png")
+			self.source_image = Image.open("Temp/temp_pattern_image.png")
 
 
 	# function for matching two directories of images
@@ -40,23 +46,29 @@ class ImageSearch:
 			for y in range(0, sourceHeight):
 				sourcePixelArray.append((sourcePixels[x,y], x, y))
 
+		found_index = -1
+
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
-				source_coordinates = self.find_pixels_in_source(uniques[x], sourcePixelArray)
-				for i in range(0, len(source_coordinates)):
-					pattern_xc = uniques[x][1]
-					pattern_yc = uniques[x][2]
+				found_index = x
+				break
+				
+		if found_index != -1:
+			source_coordinates = self.find_pixels_in_source(uniques[found_index], sourcePixelArray)
+			for i in range(0, len(source_coordinates)):
+				pattern_xc = uniques[found_index][1]
+				pattern_yc = uniques[found_index][2]
 
-					source_xc = source_coordinates[i][0]
-					source_yc = source_coordinates[i][1]
+				source_xc = source_coordinates[i][0]
+				source_yc = source_coordinates[i][1]
 
-					x_offset = source_xc - pattern_xc
-					y_offset = source_yc - pattern_yc
+				x_offset = source_xc - pattern_xc
+				y_offset = source_yc - pattern_yc
 
-					percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
+				percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
-					if(percentage > .5):
-						return "MATCHES!!! "+str(percentage*100)+" percent."
+				if(percentage > .5):
+					return "MATCHES!!! "+str(percentage*100)+" percent."				
 
 		return ""
 
@@ -113,17 +125,17 @@ class ImageSearch:
 		source_pixels = self.source_image.load()
 		source_size = self.source_image.size
 
-		for x in range(0, len(uniques), 100):
+		for x in range(0, len(uniques), 10):
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
 
-			if(pattern_xc > 0 and pattern_yc > 0 and pattern_xc <= (source_size[0]-1) and pattern_yc <= (source_size[1]-1)):
+			if(pattern_xc >= 0 and pattern_yc >= 0 and pattern_xc <= (source_size[0]-1) and pattern_yc <= (source_size[1]-1)):
 				source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-				if source_pixel == uniques[x][0][0:3]:
+				if source_pixel[0:3] == uniques[x][0][0:3]:
 					matches += 1.00
 
-		return matches/((len(uniques)/100.0)+0.00)
+		return matches/((len(uniques)/10.0)+0.00)
 
 
 #**************************************************#
