@@ -6,13 +6,13 @@ Semester Project
 Authors:
 -------------
 Jonathan Lane<br />
-Jlane09sjp@gmail.com
+Jlane09sjp@gmail.com<br />
 Mike Allen<br />
-mwa020591@gmail.com
+mwa020591@gmail.com<br />
 Julio Maniratunga<br />
-maniratunga.j@husky.neu.edu
+maniratunga.j@husky.neu.edu<br />
 Taylor Johndrew<br />
-taylorstheking@yahoo.com
+taylorstheking@yahoo.com<br />
 
 Example Usage
 -------------
