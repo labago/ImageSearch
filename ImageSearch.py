@@ -34,12 +34,10 @@ class ImageSearch:
 		# if the pattern image is a .gif, converts the mode to P to RGB
 		if self.pattern_image.format == "GIF":
 			self.pattern_image = self.pattern_image.convert("RGB")
-			print "TEST pattern mode: " + str(self.pattern_image.mode)
 		
 		# if the source image is a .gif, converts the mode from P to RGB
 		if self.source_image.format == "GIF":
 			self.source_image = self.source_image.convert("RGB")
-			print "TEST source mode: " + str(self.source_image.mode)
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
@@ -47,27 +45,32 @@ class ImageSearch:
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
-		uniques = imageSearch.find_unique_pixels()
+		uniques = imageSearch.find_unique_pixels()	# list of the unique pixels in the pattern image
 
-		patternPixels = self.pattern_image.load()
-		sourcePixels = self.source_image.load()
+		patternPixels = self.pattern_image.load()	# holds the pattern pixel information
+		sourcePixels = self.source_image.load()		# holds the source pixel information 
 
-		sourceWidth = self.source_image.size[0]
-		sourceHeight = self.source_image.size[1]
+		sourceWidth = self.source_image.size[0]		# width of the source image
+		sourceHeight = self.source_image.size[1]	# height of the source image
 
-		sourcePixelArray = []
+		sourcePixelArray = []						# a list to hold the "RGB" pixel data for the source image
 
+		# adds the "RGB" pixel data to the list
 		for x in range(0,sourceWidth):
 			for y in range(0, sourceHeight):
 				sourcePixelArray.append((sourcePixels[x,y], x, y))
 
 		found_index = -1
 
+		# checks to see any unique pixels are in the source image
 		for x in range(0, len(uniques)):
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
 				found_index = x
 				break
 				
+		# if a unique pixel is in the source image, finds the pixel in the source 
+		# and calculates the percentage of the match. If the percentage is above 50%, 
+		# prints out the match message
 		if found_index != -1:
 			source_coordinates = self.find_pixels_in_source(uniques[found_index], sourcePixelArray)
 			for i in range(0, len(source_coordinates)):
@@ -95,17 +98,18 @@ class ImageSearch:
 		patternPixels = imageSearch.pattern_image.load()
 		patSize = imageSearch.pattern_image.size
 
-		patPixelArray = []
-		uniques = []
+		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
+		uniques = []				# holds the found unique values in the pattern image	
 		
+		# adds the "RGB" pixel data to the list
 		for x in range(0,patSize[0]):
 			for y in range(0, patSize[1]):
 				patPixelArray.append((patternPixels[x,y], x, y))
 
-		patPixelArray.sort(key=lambda x: x[0])
+		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
 
 		length = len(patPixelArray)
-		seperator = length/100
+		seperator = length/100						# a value to control what pixels are considered "unique"
 
 		if(length > 201):
 			for x in range(0, 100):
@@ -136,10 +140,11 @@ class ImageSearch:
 
 	# returns the percentage of pixel to pixel matches in the unique pixel array and the source picture
 	def percentage_of_unique_matches(self, uniques, x_offset, y_offset):
-		matches = 0.00
-		source_pixels = self.source_image.load()
-		source_size = self.source_image.size
+		matches = 0.00								# initial value for the match percentage
+		source_pixels = self.source_image.load()	
+		source_size = self.source_image.size		
 
+		# 
 		for x in range(0, len(uniques), 10):
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
