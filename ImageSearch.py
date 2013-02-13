@@ -21,12 +21,12 @@ class ImageSearch:
 			print "Source image not found."
 			sys.exit()
 		
-		# if the pattern image is a .gif, converts the mode to P to RGB
-		if self.pattern_image.format == "GIF":
+		# converts the pattern image's mode to RGB
+		if self.pattern_image.mode != "RGB":
 			self.pattern_image = self.pattern_image.convert("RGB")
 		
-		# if the source image is a .gif, converts the mode from P to RGB
-		if self.source_image.format == "GIF":
+		# converts the sourcemode to RGB
+		if self.source_image.mode != "RGB":
 			self.source_image = self.source_image.convert("RGB")
 			
 		# changes the pattern image format to "PNG"
