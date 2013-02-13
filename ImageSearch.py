@@ -8,6 +8,8 @@ class ImageSearch:
 	# constructor, takes the pattern image location string and source image location string
 	# if either image is not found, termiinate program and alert user
 	def __init__(self, pattern, source):
+		
+		'''
 		try:
 			self.pattern_image = Image.open(pattern)
 		except (IOError):
@@ -24,7 +26,20 @@ class ImageSearch:
 		if self.source_image.format != "PNG":
 			self.source_image.save("Temp/temp_source_image.png")
 			self.source_image = Image.open("Temp/temp_pattern_image.png")
-
+		'''
+		
+		self.pattern_image = Image.open(pattern)
+		self.source_image  = Image.open(source)
+		
+		# if the pattern image is a .gif, converts the mode to P to RGB
+		if self.pattern_image.format == "GIF":
+			self.pattern_image = self.pattern_image.convert("RGB")
+			print "TEST pattern mode: " + str(self.pattern_image.mode)
+		
+		# if the source image is a .gif, converts the mode from P to RGB
+		if self.source_image.format == "GIF":
+			self.source_image = self.source_image.convert("RGB")
+			print "TEST source mode: " + str(self.source_image.mode)
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
