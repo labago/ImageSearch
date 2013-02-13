@@ -9,27 +9,17 @@ class ImageSearch:
 	# if either image is not found, termiinate program and alert user
 	def __init__(self, pattern, source):
 		
-		'''
 		try:
 			self.pattern_image = Image.open(pattern)
 		except (IOError):
 			print "Pattern image not found."
 			sys.exit()
-		if self.pattern_image.format != "PNG":
-			self.pattern_image.save("Temp/temp_pattern_image.png")
-			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+
 		try:
 			self.source_image = Image.open(source)
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
-		if self.source_image.format != "PNG":
-			self.source_image.save("Temp/temp_source_image.png")
-			self.source_image = Image.open("Temp/temp_pattern_image.png")
-		'''
-		
-		self.pattern_image = Image.open(pattern)
-		self.source_image  = Image.open(source)
 		
 		# if the pattern image is a .gif, converts the mode to P to RGB
 		if self.pattern_image.format == "GIF":
@@ -38,6 +28,16 @@ class ImageSearch:
 		# if the source image is a .gif, converts the mode from P to RGB
 		if self.source_image.format == "GIF":
 			self.source_image = self.source_image.convert("RGB")
+			
+		# changes the pattern image format to "PNG"
+		if self.pattern_image.format != "PNG":
+			self.pattern_image.save("Temp/temp_pattern_image.png")
+			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+			
+		# changes the source image format to "PNG"
+		if self.source_image.format != "PNG":
+			self.source_image.save("Temp/temp_source_image.png")
+			self.source_image = Image.open("Temp/temp_pattern_image.png")
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
