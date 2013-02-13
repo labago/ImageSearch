@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from PIL import Image
 import sys
+import os
 
 # a class to represent the ImageSearcg application
 class ImageSearch:
@@ -33,11 +34,13 @@ class ImageSearch:
 		if self.pattern_image.format != "PNG":
 			self.pattern_image.save("Temp/temp_pattern_image.png")
 			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+			os.remove("Temp/temp_pattern_image.png")
 			
 		# changes the source image format to "PNG"
 		if self.source_image.format != "PNG":
 			self.source_image.save("Temp/temp_source_image.png")
-			self.source_image = Image.open("Temp/temp_pattern_image.png")
+			self.source_image = Image.open("Temp/temp_source_image.png")
+			os.remove("Temp/temp_source_image.png")
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
