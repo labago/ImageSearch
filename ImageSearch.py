@@ -21,7 +21,7 @@ class ImageSearch:
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
-		
+		'''
 		# converts the pattern image's mode to RGB
 		if self.pattern_image.mode != "RGB":
 			self.pattern_image = self.pattern_image.convert("RGB")
@@ -40,6 +40,56 @@ class ImageSearch:
 			self.source_image = Image.open(location)
 			#os.remove(location) # this is causing issues, you cant delete the picture before the program finishes, 
 			# this needs to be done at the end of the script...
+		'''
+		
+		# changes the source image format to match the pattern image format if the pattern format is not "GIF"
+		if self.source_image.format != self.pattern_image.format:  #and self.pattern_image.format != "None":
+
+			if self.pattern_image.format == "GIF":
+			
+				# convert pattern_image to "RGB" and change to "PNG"
+				self.pattern_image = self.pattern_image.convert("RGB")
+				pattern_name_components = pattern.split('.')[0].split('/')
+				pattern_filename = pattern_name_components[-1]
+				location = "Temp/" + pattern_filename + '.png'
+				self.pattern_image.save(location)
+				self.pattern_image = Image.open(location)
+
+				# change source_image to "PNG"
+				source_name_components = source.split('.')[0].split('/') 
+				source_filename = source_name_components[-1]	
+				pattern_format  = '.png'
+				location = "Temp/" + source_filename + '.' + pattern_format
+				self.source_image.save(location)
+				self.source_image = Image.open(location)
+				
+			else:
+				source_name_components = source.split('.')[0].split('/')  
+				source_filename = source_name_components[-1]  
+				pattern_format  = pattern.split('.')[1]	   
+				location = "Temp/" + source_filename + '.' + pattern_format 
+				self.source_image.save(location)
+				self.source_image = Image.open(location)
+
+		# if both images are format "GIF", change both to "PNG"
+		if self.source_image.format == "GIF" == self.pattern_image.format:
+		
+			# convert pattern_image to "RGB" and change format to "PNG"
+			self.pattern_image = self.pattern_image.convert("RGB")
+			pattern_name_components = pattern.split('.')[0].split('/')
+			pattern_filename = pattern_name_components[-1]
+		       	location = "Temp/" + pattern_filename + '.png'
+	       		self.pattern_image.save(location)
+       			self.pattern_image = Image.open(location)
+				
+			# convert source_image to "RGB" and change format to "PNG"
+			self.source_image = self.source_image.convert("RGB")
+			source_name_components = source.split('.')[0].split('/') 
+			source_filename = source_name_components[-1]
+			location = "Temp/" + source_filename + '.png'
+			self.source_image.save(location)
+			self.source_image = Image.open(location)
+		
 			
 		# changes the pattern image format to "PNG"
 		if self.pattern_image.format != "PNG":
