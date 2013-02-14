@@ -98,7 +98,10 @@ class ImageSearch:
 				percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
 				if(percentage > .5):
-					return "MATCHES!!! "+str(percentage*100)+" percent."				
+					# return "MATCHES!!! "+str(percentage*100)+" percent."	
+					pat = pattern.split('/')[-1]
+					src = source.split('/')[-1]
+					return pat + " matches " + src + " by " + str(percentage*100) + " percent."			
 
 		return ""
 
