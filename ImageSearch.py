@@ -32,24 +32,26 @@ class ImageSearch:
 			
 		# changes the source image format to match the pattern image format
 		if self.source_image.format != self.pattern_image.format:
-			source_filename = source.split('.')[0].split('/')[-1]				# gets the name of the source image file
-			pattern_format  = pattern.split('.')[1]								# gets the format of the pattern image
-			location        = "Temp/" + source_filename + '.' + pattern_format 	# creates a temporary location for the converted source image
+			source_name_components = source.split('.')[0].split('/')	    			# breaks up the path of the image
+			source_filename = source_name_components[len(source_name_components)-1]		# gets the name of the source image file
+			pattern_format  = pattern.split('.')[1]										# gets the format of the pattern image
+			location        = "Temp/" + source_filename + '.' + pattern_format 			# creates a temporary location for the converted source image
 			self.source_image.save(location)
 			self.source_image = Image.open(location)
-			os.remove(location)
+			#os.remove(location) # this is causing issues, you cant delete the picture before the program finishes, 
+			# this needs to be done at the end of the script...
 			
 		# changes the pattern image format to "PNG"
 		if self.pattern_image.format != "PNG":
 			self.pattern_image.save("Temp/temp_pattern_image.png")
 			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-			os.remove("Temp/temp_pattern_image.png")
+			#os.remove("Temp/temp_pattern_image.png") see comment above, same issue
 			
 		# changes the source image format to "PNG"
 		if self.source_image.format != "PNG":
 			self.source_image.save("Temp/temp_source_image.png")
 			self.source_image = Image.open("Temp/temp_source_image.png")
-			os.remove("Temp/temp_source_image.png")
+			#os.remove("Temp/temp_source_image.png") see comment above, same issue
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
