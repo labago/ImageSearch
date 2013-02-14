@@ -30,8 +30,8 @@ class ImageSearch:
 		if self.source_image.mode != "RGB":
 			self.source_image = self.source_image.convert("RGB")
 			
-		# changes the source image format to match the pattern image format
-		if self.source_image.format != self.pattern_image.format:
+		# changes the source image format to match the pattern image format, if the pattern format is not "GIF"
+		if self.source_image.format != self.pattern_image.format and self.pattern_image.format != "GIF":
 			source_name_components = source.split('.')[0].split('/')	    			# breaks up the path of the image
 			source_filename = source_name_components[len(source_name_components)-1]		# gets the name of the source image file
 			pattern_format  = pattern.split('.')[1]										# gets the format of the pattern image
