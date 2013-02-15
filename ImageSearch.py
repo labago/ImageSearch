@@ -64,7 +64,7 @@ class ImageSearch:
 			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 				
 			# convert source image to "RGB" and change format to "PNG"
-			self.source_image = self.source_image.conver("RGB")
+			self.source_image = self.source_image.convert("RGB")
 			location = "Temp/temp_source_image.png"
 			self.source_image.save(location)
 			self.source_image = Image.open(location)
