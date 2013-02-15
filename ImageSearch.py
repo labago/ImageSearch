@@ -22,29 +22,9 @@ class ImageSearch:
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
-		'''
-		# converts the pattern image's mode to RGB
-		if self.pattern_image.mode != "RGB":
-			self.pattern_image = self.pattern_image.convert("RGB")
-		
-		# converts the sourcemode to RGB
-		if self.source_image.mode != "RGB":
-			self.source_image = self.source_image.convert("RGB")
-			
-		# changes the source image format to match the pattern image format, if the pattern format is not "GIF"
-		if self.source_image.format != self.pattern_image.format and self.pattern_image.format != "GIF":
-			source_name_components = source.split('.')[0].split('/')	    			# breaks up the path of the image
-			source_filename = source_name_components[len(source_name_components)-1]		# gets the name of the source image file
-			pattern_format  = pattern.split('.')[1]										# gets the format of the pattern image
-			location        = "Temp/" + source_filename + '.' + pattern_format 			# creates a temporary location for the converted source image
-			self.source_image.save(location)
-			self.source_image = Image.open(location)
-			#os.remove(location) # this is causing issues, you cant delete the picture before the program finishes, 
-			# this needs to be done at the end of the script...
-		'''
 		
 		# changes the source image format to match the pattern image format if the pattern format is not "GIF"
-		if self.source_image.format != self.pattern_image.format:  #and self.pattern_image.format != "None":
+		if self.source_image.format != self.pattern_image.format:
 			
 			if self.pattern_image.format == "GIF":
 			
