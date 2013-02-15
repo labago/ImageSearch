@@ -257,7 +257,9 @@ for x in range(0, len(sys.argv)):
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if(pattern != "NONE" and source != "NONE"):
 	imageSearch = ImageSearch(pattern, source)
-	print imageSearch.key_point_match()
+	output = imageSearch.key_point_match()
+	if(len(output) > 0):
+		print output
 else:
 	print "There was a problem parsing the command line arguments"
 
