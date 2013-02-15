@@ -107,13 +107,11 @@ class ImageSearch:
 		if self.pattern_image.format != "PNG":
 			self.pattern_image.save("Temp/temp_pattern_image.png")
 			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-			#os.remove("Temp/temp_pattern_image.png") see comment above, same issue
 			
 		# changes the source image format to "PNG"
 		if self.source_image.format != "PNG":
 			self.source_image.save("Temp/temp_source_image.png")
 			self.source_image = Image.open("Temp/temp_source_image.png")
-			#os.remove("Temp/temp_source_image.png") see comment above, same issue
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
@@ -294,3 +292,9 @@ if(pattern != "NONE" and source != "NONE"):
 	print imageSearch.key_point_match()
 else:
 	print "There was a problem parsing the command line arguments"
+
+# delete all files in the temp directory
+for theFile in os.listdir('Temp'):
+	file_path = os.path.join('Temp', theFile)
+	if os.path.isfile(file_path):
+		os.unlink(file_path)
