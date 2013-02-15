@@ -45,67 +45,49 @@ class ImageSearch:
 		
 		# changes the source image format to match the pattern image format if the pattern format is not "GIF"
 		if self.source_image.format != self.pattern_image.format:  #and self.pattern_image.format != "None":
-
+			
 			if self.pattern_image.format == "GIF":
 			
-				# convert pattern_image to "RGB" and change to "PNG"
+				# convert pattern image to "RGB" and change format to "PNG"
 				self.pattern_image = self.pattern_image.convert("RGB")
-				pattern_name_components = pattern.split('.')[0].split('/')
-				pattern_filename = pattern_name_components[-1]
-				location = "Temp/" + pattern_filename + '.png'
-				self.pattern_image.save(location)
-				self.pattern_image = Image.open(location)
+				self.pattern_image.save("Temp/temp_pattern_image.png")
+				self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 
-				# change source_image to "PNG"
-				source_name_components = source.split('.')[0].split('/') 
-				source_filename = source_name_components[-1]	
-				pattern_format  = '.png'
-				location = "Temp/" + source_filename + '.' + pattern_format
-				self.source_image.save(location)
-				self.source_image = Image.open(location)
-				
-			if self.source_image.format == "GIF":
-				
-				# convert source_image to "RGB" and change to match pattern format
-				self.source_image = self.source_image.convert("RGB")
-				source_name_components = source.split('.')[0].split('/')  
-				source_filename = source_name_components[-1]  
-				pattern_format  = pattern.split('.')[1]	   
-				location = "Temp/" + source_filename + '.' + pattern_format 
+				if self.source_image.format != "PNG":
+					# change source image format to "PNG"
+					self.source_image.save("Temp/temp_source_image.png")
+					self.source_image = Image.open("Temp/temp_source_image.png")
+
+			elif self.source_image.format == "GIF":
+			
+				# convert source image to "RGB" and change format to match pattern format
+				self.source_image = self.source_image.conver("RGB")
+				pattern_format = pattern.split('.')[1]
+				location = "Temp/temp_source_image." + pattern_format
 				self.source_image.save(location)
 				self.source_image = Image.open(location)
 				
 			else:
-				source_name_components = source.split('.')[0].split('/')  
-				source_filename = source_name_components[-1]  
-				pattern_format  = pattern.split('.')[1]	   
-				location = "Temp/" + source_filename + '.' + pattern_format 
+				
+				# change source image format to match pattern format
+				pattern_format = pattern.split('.')[1]
+				location = "Temp/temp_source_image." + pattern_format
 				self.source_image.save(location)
 				self.source_image = Image.open(location)
 
 		# if both images are format "GIF", change both to "PNG"
 		if self.source_image.format == "GIF" == self.pattern_image.format:
 		
-			# convert pattern_image to "RGB" and change format to "PNG"
+			# convert pattern image to "RGB" and change format to "PNG"
 			self.pattern_image = self.pattern_image.convert("RGB")
-			pattern_name_components = pattern.split('.')[0].split('/')
-			pattern_filename = pattern_name_components[-1]
-		       	location = "Temp/" + pattern_filename + '.png'
-	       		self.pattern_image.save(location)
-       			self.pattern_image = Image.open(location)
+			self.pattern_image.save("Temp/temp_pattern_image.png")
+			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 				
-			# convert source_image to "RGB" and change format to "PNG"
-			self.source_image = self.source_image.convert("RGB")
-			source_name_components = source.split('.')[0].split('/') 
-			source_filename = source_name_components[-1]
-			location = "Temp/" + source_filename + '.png'
+			# convert source image to "RGB" and change format to "PNG"
+			self.source_image = self.source_image.conver("RGB")
+			location = "Temp/temp_source_image.png"
 			self.source_image.save(location)
 			self.source_image = Image.open(location)
-			
-		# if source_image mode is not "RGB", convert to "RGB"
-		if self.source_image.mode != "RGB":
-			self.source_image = self.source_image.convert("RGB")
-		
 			
 		# changes the pattern image format to "PNG"
 		if self.pattern_image.format != "PNG":
