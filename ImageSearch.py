@@ -41,7 +41,7 @@ class ImageSearch:
 			elif self.source_image.format == "GIF":
 			
 				# convert source image to "RGB" and change format to match pattern format
-				self.source_image = self.source_image.conver("RGB")
+				self.source_image = self.source_image.convert("RGB")
 				pattern_format = pattern.split('.')[1]
 				location = "Temp/temp_source_image." + pattern_format
 				self.source_image.save(location)
