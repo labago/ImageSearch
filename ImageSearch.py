@@ -137,16 +137,18 @@ class ImageSearch:
 				x_offset = source_xc - pattern_xc
 				y_offset = source_yc - pattern_yc
 				if x_offset >= 0 and y_offset >= 0:
-					isMatch = self.checkExactMatch(x_offset, y_offset)				
 
-					#percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
+					percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
-					if isMatch == True:
+					if(percentage >= .5):
+						isMatch = self.checkExactMatch(x_offset, y_offset)				
 
-						#print the match in the professor's format
-						pat = pattern.split('/')[-1]
-						src = source.split('/')[-1]
-						return pat + " matches " + src + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(x_offset) + "+" + str(y_offset)
+						if isMatch == True:
+
+							#print the match in the professor's format
+							pat = pattern.split('/')[-1]
+							src = source.split('/')[-1]
+							return pat + " matches " + src + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(x_offset) + "+" + str(y_offset)
 				
 		#No match found
 		return ""
