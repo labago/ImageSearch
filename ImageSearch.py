@@ -2,6 +2,7 @@
 from PIL import Image
 import sys
 import os
+import math
 
 # a class to represent the ImageSearcg application
 class ImageSearch:
@@ -120,7 +121,21 @@ class ImageSearch:
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
-		uniques = imageSearch.find_unique_pixels()	# list of the unique pixels in the pattern image
+
+		patternPixels = imageSearch.pattern_image.load()
+		patSize = imageSearch.pattern_image.size
+
+		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
+
+		# adds the "RGB" pixel data to the list
+		for x in range(0,patSize[0]):
+			for y in range(0, patSize[1]):
+				patPixelArray.append((patternPixels[x,y], x, y))
+
+		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
+
+
+		uniques = imageSearch.find_unique_pixels(patPixelArray)# list of the unique pixels in the pattern image
 
 		patternPixels = self.pattern_image.load()	# holds the pattern pixel information
 		sourcePixels = self.source_image.load()		# holds the source pixel information 
@@ -142,11 +157,11 @@ class ImageSearch:
 			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
 				found_index = x
 				break
-				
-		# if a unique pixel is in the source image, finds the pixel in the source 
-		# and calculates the percentage of the match. If the percentage is above 50%, 
-		# prints out the match message
+
 		if found_index != -1:
+			# if a unique pixel is in the source image, finds the pixel in the source 
+			# and calculates the percentage of the match. If the percentage is above 50%, 
+			# prints out the match message
 			source_coordinates = self.find_pixels_in_source(uniques[found_index], sourcePixelArray)
 			for i in range(0, len(source_coordinates)):
 				pattern_xc = uniques[found_index][1]
@@ -157,43 +172,37 @@ class ImageSearch:
 
 				x_offset = source_xc - pattern_xc
 				y_offset = source_yc - pattern_yc
+				if x_offset >= 0 and y_offset >= 0:
+					isMatch = self.checkExactMatch(x_offset, y_offset)				
 
-				percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
+					#percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
-				if(percentage > .5):
-					# return "MATCHES!!! "+str(percentage*100)+" percent."	
-					pat = pattern.split('/')[-1]
-					src = source.split('/')[-1]
-					return pat + " matches " + src + " by " + str(percentage*100) + " percent."			
+					if isMatch == True:
 
+						#print the match in the professor's format
+						pat = pattern.split('/')[-1]
+						src = source.split('/')[-1]
+						return pat + " matches " + src + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(x_offset) + "+" + str(y_offset)
+				
+		#No match found
 		return ""
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
 	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
 	# be returned and compared
-	def find_unique_pixels(self):
-		patternPixels = imageSearch.pattern_image.load()
-		patSize = imageSearch.pattern_image.size
-
-		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
+	def find_unique_pixels(self, patPixelArray):
 		uniques = []				# holds the found unique values in the pattern image	
 		
-		# adds the "RGB" pixel data to the list
-		for x in range(0,patSize[0]):
-			for y in range(0, patSize[1]):
-				patPixelArray.append((patternPixels[x,y], x, y))
-
-		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
-
+		
 		length = len(patPixelArray)
 		seperator = length/100						# a value to control what pixels are considered "unique"
 
-		if(length > 201):
-			for x in range(0, 100):
+		if(length > 101):
+			for x in range(0, 50):
 				uniques.append(patPixelArray[x])
 
-			for x in range((length-101), length-1):
+			for x in range((length-51), length-1):
 				uniques.append(patPixelArray[x])
 		else:
 			for x in patPixelArray:
@@ -204,7 +213,7 @@ class ImageSearch:
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
-			if array[x][0][0:3] == pixel[0][0:3]:
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 20):
 				return True
 		return False
 
@@ -212,7 +221,7 @@ class ImageSearch:
 	def find_pixels_in_source(self, pixel, array):
 		matches = []
 		for x in range(0, len(array)):
-			if array[x][0][0:3] == pixel[0][0:3]:
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 20):
 				matches.append((array[x][1], array[x][2]))
 		return matches
 
@@ -234,6 +243,35 @@ class ImageSearch:
 					matches += 1.00
 
 		return matches/((len(uniques)/10.0)+0.00)
+
+	def checkExactMatch(self, x_offset, y_offset):
+		source_pixels = self.source_image.load()
+		pattern_pixels = self.pattern_image.load()
+		pattern_width = self.pattern_image.size[0]
+		pattern_height = self.pattern_image.size[1]
+		
+		print "checking exact match at " + str(x_offset) + ", " + str(y_offset)
+		for y in range(0, pattern_height):
+			for x in range(0, pattern_width):
+				patPixel = pattern_pixels[x, y]
+				sourcePixel = source_pixels[x + x_offset, y + y_offset]
+				
+				if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel, 40) == False:
+					return False
+		return True
+
+	#it seems that pixels are getting changed slightly in the process of this program
+	#I saw some images failing matching because some pixels had tiny differences in RGB vals
+	#not sure why the pixels are getting altered, but this is a workaround
+	def checkIfTwoPixelsAreEquivalent(self, pixel1, pixel2, tolerableDiff):
+		Rdiff = math.fabs(pixel1[0] - pixel2[0])
+		Gdiff = math.fabs(pixel1[1] - pixel2[1])
+		Bdiff = math.fabs(pixel1[2] - pixel2[2])
+		
+		if (Rdiff + Gdiff + Bdiff < tolerableDiff):
+			return True
+		else: 
+			return False
 
 
 #**************************************************#
