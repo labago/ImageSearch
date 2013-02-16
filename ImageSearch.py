@@ -22,62 +22,76 @@ class ImageSearch:
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
-		
-		# changes the source image format to match the pattern image format if the pattern format is not "GIF"
-		if self.source_image.format != self.pattern_image.format:
-			
-			if self.pattern_image.format == "GIF":
-			
-				# convert pattern image to "RGB" and change format to "PNG"
-				self.pattern_image = self.pattern_image.convert("RGB")
-				self.pattern_image.save("Temp/temp_pattern_image.png")
-				self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 
-				if self.source_image.format != "PNG":
-					# change source image format to "PNG"
-					self.source_image.save("Temp/temp_source_image.png")
-					self.source_image = Image.open("Temp/temp_source_image.png")
-
-			elif self.source_image.format == "GIF":
-			
-				# convert source image to "RGB" and change format to match pattern format
-				self.source_image = self.source_image.convert("RGB")
-				pattern_format = pattern.split('.')[1]
-				location = "Temp/temp_source_image." + pattern_format
-				self.source_image.save(location)
-				self.source_image = Image.open(location)
-				
-			else:
-				
-				# change source image format to match pattern format
-				pattern_format = pattern.split('.')[1]
-				location = "Temp/temp_source_image." + pattern_format
-				self.source_image.save(location)
-				self.source_image = Image.open(location)
-
-		# if both images are format "GIF", change both to "PNG"
-		if self.source_image.format == "GIF" == self.pattern_image.format:
-		
-			# convert pattern image to "RGB" and change format to "PNG"
-			self.pattern_image = self.pattern_image.convert("RGB")
-			self.pattern_image.save("Temp/temp_pattern_image.png")
-			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-				
-			# convert source image to "RGB" and change format to "PNG"
-			self.source_image = self.source_image.convert("RGB")
-			location = "Temp/temp_source_image.png"
-			self.source_image.save(location)
-			self.source_image = Image.open(location)
-			
-		# changes the pattern image format to "PNG"
+		# convert image into the correct format and into the correct RGB mode
+		# simplified
 		if self.pattern_image.format != "PNG":
 			self.pattern_image.save("Temp/temp_pattern_image.png")
 			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-			
-		# changes the source image format to "PNG"
+		if self.pattern_image.mode != "RGB":
+			self.pattern_image = self.pattern_image.convert("RGB")
+
 		if self.source_image.format != "PNG":
 			self.source_image.save("Temp/temp_source_image.png")
 			self.source_image = Image.open("Temp/temp_source_image.png")
+		if self.source_image.mode != "RGB":
+			self.source_image = self.source_image.convert("RGB")
+
+		# # changes the source image format to match the pattern image format if the pattern format is not "GIF"
+		# if self.source_image.format != self.pattern_image.format:
+			
+		# 	if self.pattern_image.format == "GIF":
+			
+		# 		# convert pattern image to "RGB" and change format to "PNG"
+		# 		self.pattern_image = self.pattern_image.convert("RGB")
+		# 		self.pattern_image.save("Temp/temp_pattern_image.png")
+		# 		self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+
+		# 		if self.source_image.format != "PNG":
+		# 			# change source image format to "PNG"
+		# 			self.source_image.save("Temp/temp_source_image.png")
+		# 			self.source_image = Image.open("Temp/temp_source_image.png")
+
+		# 	elif self.source_image.format == "GIF":
+			
+		# 		# convert source image to "RGB" and change format to match pattern format
+		# 		self.source_image = self.source_image.convert("RGB")
+		# 		pattern_format = pattern.split('.')[1]
+		# 		location = "Temp/temp_source_image." + pattern_format
+		# 		self.source_image.save(location)
+		# 		self.source_image = Image.open(location)
+				
+		# 	else:
+				
+		# 		# change source image format to match pattern format
+		# 		pattern_format = pattern.split('.')[1]
+		# 		location = "Temp/temp_source_image." + pattern_format
+		# 		self.source_image.save(location)
+		# 		self.source_image = Image.open(location)
+
+		# # if both images are format "GIF", change both to "PNG"
+		# if self.source_image.format == "GIF" == self.pattern_image.format:
+		
+		# 	# convert pattern image to "RGB" and change format to "PNG"
+		# 	self.pattern_image = self.pattern_image.convert("RGB")
+		# 	self.pattern_image.save("Temp/temp_pattern_image.png")
+		# 	self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+				
+		# 	# convert source image to "RGB" and change format to "PNG"
+		# 	self.source_image = self.source_image.convert("RGB")
+		# 	location = "Temp/temp_source_image.png"
+		# 	self.source_image.save(location)
+		# 	self.source_image = Image.open(location)
+			
+		# # changes the pattern image format to "PNG"
+		# if self.pattern_image.format != "PNG":
+		# 	self.pattern_image.save("Temp/temp_pattern_image.png")
+		# 	self.pattern_image = Image.open("Temp/temp_pattern_image.png")
+			
+		# # changes the source image format to "PNG"
+		# if self.source_image.format != "PNG":
+		# 	self.source_image.save("Temp/temp_source_image.png")
+		# 	self.source_image = Image.open("Temp/temp_source_image.png")
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
@@ -140,7 +154,7 @@ class ImageSearch:
 
 					percentage = self.percentage_of_unique_matches(uniques, x_offset, y_offset)
 
-					if(percentage >= .5):
+					if(percentage >= .3):
 						isMatch = self.checkExactMatch(x_offset, y_offset)				
 
 						if isMatch == True:
@@ -179,7 +193,7 @@ class ImageSearch:
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
-			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 20):
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 60):
 				return True
 		return False
 
@@ -187,7 +201,7 @@ class ImageSearch:
 	def find_pixels_in_source(self, pixel, array):
 		matches = []
 		for x in range(0, len(array)):
-			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 20):
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 60):
 				matches.append((array[x][1], array[x][2]))
 		return matches
 
@@ -205,7 +219,7 @@ class ImageSearch:
 			if(pattern_xc >= 0 and pattern_yc >= 0 and pattern_xc <= (source_size[0]-1) and pattern_yc <= (source_size[1]-1)):
 				source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-				if source_pixel[0:3] == uniques[x][0][0:3]:
+				if self.checkIfTwoPixelsAreEquivalent(source_pixel[0:3], uniques[x][0][0:3], 60):
 					matches += 1.00
 
 		return matches/((len(uniques)/10.0)+0.00)
@@ -222,7 +236,7 @@ class ImageSearch:
 				patPixel = pattern_pixels[x, y]
 				sourcePixel = source_pixels[x + x_offset, y + y_offset]
 				
-				if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel, 40) == False:
+				if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel, 60) == False:
 					return False
 		return True
 
