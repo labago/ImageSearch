@@ -243,7 +243,7 @@ class ImageSearch:
 					if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel) == False:
 						return False
 				else:
-					return false
+					return False
 		return True
 
 	#it seems that pixels are getting changed slightly in the process of this program
