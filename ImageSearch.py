@@ -26,74 +26,11 @@ class ImageSearch:
 		self.patternFormat = self.pattern_image.format
 		self.sourceFormat = self.source_image.format
 
-		# convert image into the correct format and into the correct RGB mode
-		# simplified
-		if self.pattern_image.format != "PNG":
-			self.pattern_image.save("Temp/temp_pattern_image.png")
-			self.pattern_image = Image.open("Temp/temp_pattern_image.png")
 		if self.pattern_image.mode != "RGB":
 			self.pattern_image = self.pattern_image.convert("RGB")
 
-		if self.source_image.format != "PNG":
-			self.source_image.save("Temp/temp_source_image.png")
-			self.source_image = Image.open("Temp/temp_source_image.png")
 		if self.source_image.mode != "RGB":
 			self.source_image = self.source_image.convert("RGB")
-		# # changes the source image format to match the pattern image format if the pattern format is not "GIF"
-		# if self.source_image.format != self.pattern_image.format:
-			
-		# 	if self.pattern_image.format == "GIF":
-			
-		# 		# convert pattern image to "RGB" and change format to "PNG"
-		# 		self.pattern_image = self.pattern_image.convert("RGB")
-		# 		self.pattern_image.save("Temp/temp_pattern_image.png")
-		# 		self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-
-		# 		if self.source_image.format != "PNG":
-		# 			# change source image format to "PNG"
-		# 			self.source_image.save("Temp/temp_source_image.png")
-		# 			self.source_image = Image.open("Temp/temp_source_image.png")
-
-		# 	elif self.source_image.format == "GIF":
-			
-		# 		# convert source image to "RGB" and change format to match pattern format
-		# 		self.source_image = self.source_image.convert("RGB")
-		# 		pattern_format = pattern.split('.')[1]
-		# 		location = "Temp/temp_source_image." + pattern_format
-		# 		self.source_image.save(location)
-		# 		self.source_image = Image.open(location)
-				
-		# 	else:
-				
-		# 		# change source image format to match pattern format
-		# 		pattern_format = pattern.split('.')[1]
-		# 		location = "Temp/temp_source_image." + pattern_format
-		# 		self.source_image.save(location)
-		# 		self.source_image = Image.open(location)
-
-		# # if both images are format "GIF", change both to "PNG"
-		# if self.source_image.format == "GIF" == self.pattern_image.format:
-		
-		# 	# convert pattern image to "RGB" and change format to "PNG"
-		# 	self.pattern_image = self.pattern_image.convert("RGB")
-		# 	self.pattern_image.save("Temp/temp_pattern_image.png")
-		# 	self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-				
-		# 	# convert source image to "RGB" and change format to "PNG"
-		# 	self.source_image = self.source_image.convert("RGB")
-		# 	location = "Temp/temp_source_image.png"
-		# 	self.source_image.save(location)
-		# 	self.source_image = Image.open(location)
-			
-		# # changes the pattern image format to "PNG"
-		# if self.pattern_image.format != "PNG":
-		# 	self.pattern_image.save("Temp/temp_pattern_image.png")
-		# 	self.pattern_image = Image.open("Temp/temp_pattern_image.png")
-			
-		# # changes the source image format to "PNG"
-		# if self.source_image.format != "PNG":
-		# 	self.source_image.save("Temp/temp_source_image.png")
-		# 	self.source_image = Image.open("Temp/temp_source_image.png")
 
 	# function for matching two directories of images
 	def match_images(self, patterns, specimens):
