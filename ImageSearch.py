@@ -22,6 +22,9 @@ class ImageSearch:
 		except (IOError):
 			print "Source image not found."
 			sys.exit()
+		
+		self.patternFormat = self.pattern_image.format
+		self.sourceFormat = self.source_image.format
 
 		# convert image into the correct format and into the correct RGB mode
 		# simplified
@@ -36,7 +39,6 @@ class ImageSearch:
 			self.source_image = Image.open("Temp/temp_source_image.png")
 		if self.source_image.mode != "RGB":
 			self.source_image = self.source_image.convert("RGB")
-
 		# # changes the source image format to match the pattern image format if the pattern format is not "GIF"
 		# if self.source_image.format != self.pattern_image.format:
 			
@@ -193,7 +195,7 @@ class ImageSearch:
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
 		for x in range(0, len(array)):
-			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 60):
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3]):
 				return True
 		return False
 
@@ -201,7 +203,7 @@ class ImageSearch:
 	def find_pixels_in_source(self, pixel, array):
 		matches = []
 		for x in range(0, len(array)):
-			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3], 60):
+			if self.checkIfTwoPixelsAreEquivalent(array[x][0][0:3], pixel[0][0:3]):
 				matches.append((array[x][1], array[x][2]))
 		return matches
 
@@ -219,7 +221,7 @@ class ImageSearch:
 			if(pattern_xc >= 0 and pattern_yc >= 0 and pattern_xc <= (source_size[0]-1) and pattern_yc <= (source_size[1]-1)):
 				source_pixel = source_pixels[pattern_xc, pattern_yc]
 
-				if self.checkIfTwoPixelsAreEquivalent(source_pixel[0:3], uniques[x][0][0:3], 60):
+				if self.checkIfTwoPixelsAreEquivalent(source_pixel[0:3], uniques[x][0][0:3]):
 					matches += 1.00
 
 		return matches/((len(uniques)/10.0)+0.00)
@@ -229,21 +231,34 @@ class ImageSearch:
 		pattern_pixels = self.pattern_image.load()
 		pattern_width = self.pattern_image.size[0]
 		pattern_height = self.pattern_image.size[1]
+		source_width = self.source_image.size[0]
+		source_height = self.source_image.size[1]
 		
-		print "checking exact match at " + str(x_offset) + ", " + str(y_offset)
 		for y in range(0, pattern_height):
 			for x in range(0, pattern_width):
-				patPixel = pattern_pixels[x, y]
-				sourcePixel = source_pixels[x + x_offset, y + y_offset]
-				
-				if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel, 60) == False:
-					return False
+				if x + x_offset < source_width and y + y_offset < source_height:
+					patPixel = pattern_pixels[x, y]
+					sourcePixel = source_pixels[x + x_offset, y + y_offset]
+					
+					if self.checkIfTwoPixelsAreEquivalent(patPixel, sourcePixel) == False:
+						return False
+				else:
+					return false
 		return True
 
 	#it seems that pixels are getting changed slightly in the process of this program
 	#I saw some images failing matching because some pixels had tiny differences in RGB vals
 	#not sure why the pixels are getting altered, but this is a workaround
-	def checkIfTwoPixelsAreEquivalent(self, pixel1, pixel2, tolerableDiff):
+	def checkIfTwoPixelsAreEquivalent(self, pixel1, pixel2):
+		tolerableDiff = 5				
+		#if both PNG, little room for error
+		#if one is JPG, tolerable error = 60
+		#if one is GIF, tolerable error = 150
+		if self.patternFormat == "JPEG" or self.sourceFormat == "JPEG":
+			tolerableDiff = 60
+		if self.patternFormat == "GIF" or self.sourceFormat == "GIF":
+			tolerableDiff = 150
+
 		Rdiff = math.fabs(pixel1[0] - pixel2[0])
 		Gdiff = math.fabs(pixel1[1] - pixel2[1])
 		Bdiff = math.fabs(pixel1[2] - pixel2[2])
