@@ -1,4 +1,4 @@
-ImageSearch (Working Title)
+ImageSearch
 ===========
 
 Semester Project
@@ -6,20 +6,29 @@ Semester Project
 Authors:
 -------------
 Jonathan Lane<br />
-Jlane09sjp@gmail.com<br />
+jlane09sjp@gmail.com<br />
+
 Mike Allen<br />
 mwa020591@gmail.com<br />
+
 Julio Maniratunga<br />
 maniratunga.j@husky.neu.edu<br />
+
 Taylor Johndrew<br />
 taylorstheking@yahoo.com<br />
 
-Example Usage
+Example Usage with spims file
 -------------
 
-<code>python ImageSearch.py -p TestImages/morning.png -s TestImages/morning.png </code>
+<code>./spims -p TestImages/morning.png -s TestImages/morning.png </code>
 
-Should return MATCHES in the console output
+Spims File
+-------------
+
+The spims file is located in the build directory and is allset to be used like <code>./spims -p path/to/pattern/image.jpg -s path/to/source/image.jpg </code>
+
+<br />
+OR
 
 To Make Spims File
 -------------
