@@ -98,12 +98,12 @@ class ImageSearch:
 
 						if isMatch == True:
 
-							#print the match in the professor's format
+							# print the match in the professor's format
 							pat = pattern.split('/')[-1]
 							src = source.split('/')[-1]
 							return pat + " matches " + src + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(x_offset) + "+" + str(y_offset)
 				
-		#No match found
+		# No match found
 		return ""
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
@@ -150,7 +150,6 @@ class ImageSearch:
 		source_pixels = self.source_image.load()	
 		source_size = self.source_image.size		
 
-		# 
 		for x in range(0, len(uniques), 10):
 			pattern_xc = uniques[x][1]+x_offset
 			pattern_yc = uniques[x][2]+y_offset
@@ -183,9 +182,9 @@ class ImageSearch:
 					return False
 		return True
 
-	#it seems that pixels are getting changed slightly in the process of this program
-	#I saw some images failing matching because some pixels had tiny differences in RGB vals
-	#not sure why the pixels are getting altered, but this is a workaround
+	# it seems that pixels are getting changed slightly in the process of this program
+	# I saw some images failing matching because some pixels had tiny differences in RGB vals
+	# not sure why the pixels are getting altered, but this is a workaround
 	def checkIfTwoPixelsAreEquivalent(self, pixel1, pixel2):
 		tolerableDiff = 5				
 		#if both PNG, little room for error
