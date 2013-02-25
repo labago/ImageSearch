@@ -3,6 +3,7 @@ from PIL import Image
 import sys
 import os
 import math
+from datetime import datetime
 
 # a class to represent the ImageSearch application
 class ImageSearch:
@@ -211,6 +212,8 @@ class ImageSearch:
 #**********# BEGIN EXECUTION OF PROGRAM #**********#
 #**************************************************#
 
+startTime = datetime.now()
+
 # parse command line arguments as the assignment requires
 pattern = "NONE"
 source = "NONE"
@@ -255,3 +258,5 @@ if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_
 	imageSearch.match_images()
 else:
 	print "There was a problem parsing the command line arguments"
+
+print(datetime.now()-startTime)
