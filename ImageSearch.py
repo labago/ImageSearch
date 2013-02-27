@@ -218,6 +218,16 @@ class ImageSearch:
 		else: 
 			return False
 
+# used to check if an image format is supported by the program
+# Arguments: fileLoc is the file location and imgtype is the type of input (pattern, source, etc.)
+def checkFormat(fileLoc, imgtype):
+	
+	frm = fileLoc.split('.')[1]
+	
+	if frm != 'jpg' and frm != 'jpeg' and frm != 'png' and frm != 'gif':
+		print 'Unsupported file format: ' + '.' + frm + " in " + imgtype
+		sys.exit(1)
+
 
 #**************************************************#
 #**********# BEGIN EXECUTION OF PROGRAM #**********#
@@ -234,12 +244,20 @@ source_dir = "NONE"
 for x in range(0, len(sys.argv)):
 	if(str(sys.argv[x]) == '-p'):
 		pattern = str(sys.argv[x+1])
+		checkFormat(pattern, "pattern image")
 	if(str(sys.argv[x]) == '-s'):
 		source = str(sys.argv[x+1])
+		checkFormat(source, "source image")
 	if(str(sys.argv[x]) == '-sdir'):
 		source_dir = str(sys.argv[x+1])
+		srcfile = os.listdir(source_dir)
+		for f in srcfiles:
+			checkFormat(f, "source directory"
 	if(str(sys.argv[x]) == '-pdir'):
 		pattern_dir = str(sys.argv[x+1])
+		patfiles = os.listdir(pattern_dir)
+		for f in patfiles:
+			checkFormat(f, "pattern directory")
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):
