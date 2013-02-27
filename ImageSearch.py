@@ -252,7 +252,7 @@ for x in range(0, len(sys.argv)):
 		source_dir = str(sys.argv[x+1])
 		srcfile = os.listdir(source_dir)
 		for f in srcfiles:
-			checkFormat(f, "source directory"
+			checkFormat(f, "source directory")
 	if(str(sys.argv[x]) == '-pdir'):
 		pattern_dir = str(sys.argv[x+1])
 		patfiles = os.listdir(pattern_dir)
