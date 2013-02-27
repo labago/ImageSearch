@@ -13,6 +13,7 @@ class ImageSearch:
 	def __init__(self, pattern_array, source_array):
 		self.pattern_array = pattern_array
 		self.source_array = source_array
+		self.current_confidence = 0
 
 	# function for matching two directories of images
 	def match_images(self):
@@ -97,16 +98,22 @@ class ImageSearch:
 				xOffset = sourceXC - patternXC
 				yOffset = sourceYC - patternYC
 				if xOffset >= 0 and yOffset >= 0:
-
+					self.current_confidence = 0;
 					percentage = self.percentage_of_unique_matches(uniques, xOffset, yOffset)
-
+				
 					if(percentage >= .3):
+						
 						isMatch = self.check_exact_match(xOffset, yOffset)				
 
 						if isMatch == True:
 
+							#inverse the confidence to get the real value, then change to percent, trim decimals
+							self.current_confidence = 1 - self.current_confidence
+							self.current_confidence = self.current_confidence * 100
+							confd = int(self.current_confidence)
+
 							# print the match in the professor's format
-							print self.patternName + " matches " + self.sourceName + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(xOffset) + "+" + str(yOffset)
+							print self.patternName + " matches " + self.sourceName + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(xOffset) + "+" + str(yOffset) + " with confidence " + str(confd) + "%"
 				
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
@@ -172,22 +179,23 @@ class ImageSearch:
 		patternHeigth = self.paternImage.size[1]
 		sourceWidth = self.sourceImage.size[0]
 		sourceHeight = self.sourceImage.size[1]
-		
+
+		counter = 0
 		for y in range(0, patternHeigth):
 			for x in range(0, patternWidth):
 				if x + xOffset < sourceWidth and y + yOffset < sourceHeight:
 					patPixel = patternPixels[x, y]
 					sourcePixel = sourcePixels[x + xOffset, y + yOffset]
 					
+					counter += 1
 					if self.check_if_two_pixels_are_equivelant(patPixel, sourcePixel) == False:
 						return False
 				else:
 					return False
+		self.current_confidence = self.current_confidence/counter
 		return True
 
-	# it seems that pixels are getting changed slightly in the process of this program
-	# I saw some images failing matching because some pixels had tiny differences in RGB vals
-	# not sure why the pixels are getting altered, but this is a workaround
+	# checks pixel equivalency rather than equality, since changing image format will alter pixels
 	def check_if_two_pixels_are_equivelant(self, pixel1, pixel2):
 		tolerableDiff = 5				
 		# if both PNG, little room for error
@@ -198,11 +206,14 @@ class ImageSearch:
 		if self.patternFormat == "GIF" or self.sourceFormat == "GIF":
 			tolerableDiff = 150
 
+		
 		Rdiff = math.fabs(pixel1[0] - pixel2[0])
 		Gdiff = math.fabs(pixel1[1] - pixel2[1])
 		Bdiff = math.fabs(pixel1[2] - pixel2[2])
 		
-		if (Rdiff + Gdiff + Bdiff < tolerableDiff):
+		totalDiff = Rdiff + Gdiff + Bdiff
+		if (totalDiff < tolerableDiff):
+			self.current_confidence += totalDiff/tolerableDiff
 			return True
 		else: 
 			return False
