@@ -225,7 +225,7 @@ def checkFormat(fileLoc, imgtype):
 	frm = fileLoc.split('.')[1]
 	
 	if frm != 'jpg' and frm != 'jpeg' and frm != 'png' and frm != 'gif':
-		print 'Unsupported file format: ' + '.' + frm + " in " + imgtype
+		print >>sys.stderr, 'Unsupported file format: ' + '.' + frm + " in " + imgtype
 		sys.exit(1)
 
 
