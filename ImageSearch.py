@@ -230,12 +230,13 @@ def checkFormat(fileLoc, imgtype):
 		
 # used to check if a directory has any subdirectories. Exits with exit code 1 if true
 # Arguments: fileLoc is the file location and direc is the type of directory: pattern or source
-def checkSubDir(fileLoc, direc):
+def checkSubDir(fileLoc, direc, p):
 
-	if os.path.isdir(str(os.path.abspath(fileLoc))):
+	path = p.split(fileLoc)[0] + '/'   # gets the path that leads to 'fileLoc'
+
+	if os.path.isdir(os.path.join(path, fileLoc)):
 		print >>sys.stderr, 'Subdirectory found in ' + direc
 		sys.exit(1)
-
 
 #**************************************************#
 #**********# BEGIN EXECUTION OF PROGRAM #**********#
@@ -250,23 +251,37 @@ pattern_dir = "NONE"
 source_dir = "NONE"
 
 for x in range(0, len(sys.argv)):
+
 	if(str(sys.argv[x]) == '-p'):
+		
 		pattern = str(sys.argv[x+1])
+
+		# check for unsupported file formats
 		checkFormat(pattern, "pattern image")
+
 	if(str(sys.argv[x]) == '-s'):
+
 		source = str(sys.argv[x+1])
+
+		# check for unsupported file formats
 		checkFormat(source, "source image")
+
 	if(str(sys.argv[x]) == '-sdir'):
+
 		source_dir = str(sys.argv[x+1])
+
+		# check for subdirectories and unsupported file formats
 		for f in os.listdir(source_dir):
-			checkSubDir(f, "source directory")
-		for f in os.listdir(source_dir):
+			checkSubDir(f, "source directory", source_dir)
 			checkFormat(f, "source directory")
+
 	if(str(sys.argv[x]) == '-pdir'):
+		
 		pattern_dir = str(sys.argv[x+1])
+		
+		# check for subdirectories and unsupported file formats
 		for f in os.listdir(pattern_dir):
-			checkSubDir(f, "pattern directory")
-		for f in os.listdir(pattern_dir):
+			checkSubDir(f, "pattern directory", pattern_dir)
 			checkFormat(f, "pattern directory")
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
