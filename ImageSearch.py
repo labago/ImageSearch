@@ -237,6 +237,13 @@ def checkSubDir(fileLoc, direc, p):
 	if os.path.isdir(os.path.join(path, fileLoc)):
 		print >>sys.stderr, 'Subdirectory found in ' + direc
 		sys.exit(1)
+		
+# used to check if a file exists. Exits with exit code 1 if false
+def checkExistence(fileLoc, filetype):
+
+	if not os.path.exists(fileLoc):
+		print >>sys.stderr, filetype + ' <' + fileLoc  + '>  does not exist'
+		sys.exit(1)
 
 #**************************************************#
 #**********# BEGIN EXECUTION OF PROGRAM #**********#
@@ -256,33 +263,45 @@ for x in range(0, len(sys.argv)):
 		
 		pattern = str(sys.argv[x+1])
 
-		# check for unsupported file formats
-		checkFormat(pattern, "pattern image")
+		# check if file exists
+		checkExistence(pattern, 'pattern image')
+		
+		#check for unsupported file formats
+		checkFormat(pattern, 'pattern image')
 
 	if(str(sys.argv[x]) == '-s'):
 
 		source = str(sys.argv[x+1])
 
+		# check if file exists
+		checkExistence(source, 'source image')
+
 		# check for unsupported file formats
-		checkFormat(source, "source image")
+		checkFormat(source, 'source image')
 
 	if(str(sys.argv[x]) == '-sdir'):
 
 		source_dir = str(sys.argv[x+1])
 
+		# check if directory exists
+		checkExistence(source_dir, 'source directory')
+
 		# check for subdirectories and unsupported file formats
 		for f in os.listdir(source_dir):
-			checkSubDir(f, "source directory", source_dir)
-			checkFormat(f, "source directory")
+			checkSubDir(f, 'source directory', source_dir)
+			checkFormat(f, 'source directory')
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
 		pattern_dir = str(sys.argv[x+1])
+
+		# check if directory exists
+		checkExistence(pattern_dir, 'pattern directory')
 		
 		# check for subdirectories and unsupported file formats
 		for f in os.listdir(pattern_dir):
-			checkSubDir(f, "pattern directory", pattern_dir)
-			checkFormat(f, "pattern directory")
+			checkSubDir(f, 'pattern directory', pattern_dir)
+			checkFormat(f, 'pattern directory')
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):
