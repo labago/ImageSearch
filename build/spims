@@ -161,9 +161,12 @@ class ImageSearch:
 				if(percentage_overlap >= .5):
 					if not self.matches[i][5] > image_info[5]:
 						self.matches[i] = image_info
+						return 0
 				else:
 					self.matches.append(image_info)
+					return 0
 		self.matches.append(image_info)
+		return 0
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
