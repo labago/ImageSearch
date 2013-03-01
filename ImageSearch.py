@@ -54,7 +54,8 @@ class ImageSearch:
 		# print all matches
 		for x in self.matches:
 			# print the match in the professor's format
-			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4]) + " with confidence " + str(x[5]) + "%"
+			# removed confidence level printing ---->  + " with confidence " + str(x[5]) + "%"
+			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
@@ -192,7 +193,6 @@ class ImageSearch:
 				if(percentage_overlap >= .5):
 					if not self.matches[i][5] > image_info[5]:
 						self.matches[i] = image_info
-						print "REPLACED"
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
