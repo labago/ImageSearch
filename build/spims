@@ -385,6 +385,8 @@ if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_
 	imageSearch = ImageSearch(pattern_array, source_array)
 	imageSearch.match_images()
 else:
-	print "There was a problem parsing the command line arguments"
+	print >>sys.stderr, 'There was a problem parsing the command line arguments'
+	sys.exit(1)
 
-print(datetime.now()-startTime)
+# uncomment to see benchmark
+# print(datetime.now()-startTime)
