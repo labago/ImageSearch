@@ -357,7 +357,7 @@ for x in range(0, len(sys.argv)):
 		for f in os.listdir(pattern_dir):
 			checkSubDir(f, 'pattern directory', pattern_dir)
 			checkFormat(f, 'pattern directory')
-\
+
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):
 
@@ -390,3 +390,4 @@ else:
 
 # uncomment to see benchmark
 # print(datetime.now()-startTime)
+sys.exit(0)

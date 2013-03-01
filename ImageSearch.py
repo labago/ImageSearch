@@ -22,20 +22,14 @@ class ImageSearch:
 			for source in self.source_array:
 				try:
 					self.patternImage = Image.open(pattern)
-					self.patternName = pattern.split('\\')[-1]
-					if self.patternImage.format != "JPEG" and self.patternImage.format != "GIF" and self.patternImage.format != "PNG":
-						print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
-						sys.exit(1)
+					self.patternName = pattern.split('/')[-1]
 				except (IOError):
 					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
 					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
-					self.sourceName = source.split('\\')[-1]
-					if self.sourceImage.format != "JPEG" and self.sourceImage.format != "GIF" and self.sourceImage.format != "PNG":
-						print >>sys.stderr, 'Source image not found or not of the correct image format.'
-						sys.exit(1)
+					self.sourceName = source.split('/')[-1]
 				except (IOError):
 					print >>sys.stderr, 'Source image not found or not of the correct image format.'
 					sys.exit(1)
@@ -127,12 +121,7 @@ class ImageSearch:
 							confd = int(self.current_confidence)
 
 							# decide whether to add the match to the total array of matches, replace a match, or do not add
-							decision = self.new_or_better_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
-							if decision == "ADD":
-								self.matches.append((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
-							elif decision == "REPLACE":
-								self.replace_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
-				
+							self.new_or_better_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
@@ -170,29 +159,11 @@ class ImageSearch:
 				image_area = (self.matches[i][2][0]*self.matches[i][2][1])+0.0
 				percentage_overlap = overlap_area/image_area
 				if(percentage_overlap >= .5):
-					if self.matches[i][5] > image_info[5]:
-						return "NO"
-					else:
-						return "REPLACE"
-				else:
-					return "ADD"
-		return "ADD"
-
-	def replace_match(self, image_info):
-		for i in range(0, len(self.matches)):
-			# if the pattern and source names are the same we should check if the
-			# if the matched area are over lapping too much (50 percent)
-			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
-				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
-				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
-				xC = self.matches[i][2][0] - xOffsetDiff
-				yC = self.matches[i][2][1] - yOffsetDiff
-				overlap_area = (xC*yC)+0.0
-				image_area = (self.matches[i][2][0]*self.matches[i][2][1])+0.0
-				percentage_overlap = overlap_area/image_area
-				if(percentage_overlap >= .5):
 					if not self.matches[i][5] > image_info[5]:
 						self.matches[i] = image_info
+				else:
+					self.matches.append(image_info)
+		self.matches.append(image_info)
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
@@ -227,6 +198,8 @@ class ImageSearch:
 
 		return matches/((len(uniques)/10.0)+0.00)
 
+	# checks if the current pattern and source image exactly match in the
+	# partial match area. This also sets the confidence level of the match
 	def check_exact_match(self, xOffset, yOffset):
 		sourcePixels = self.sourceImage.load()
 		patternPixels = self.patternImage.load()
@@ -390,4 +363,4 @@ else:
 
 # uncomment to see benchmark
 # print(datetime.now()-startTime)
-sys.exit(1)
+sys.exit(0)
