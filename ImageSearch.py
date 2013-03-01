@@ -24,19 +24,21 @@ class ImageSearch:
 					self.patternImage = Image.open(pattern)
 					self.patternName = pattern.split('\\')[-1]
 					if self.patternImage.format != "JPEG" and self.patternImage.format != "GIF" and self.patternImage.format != "PNG":
-						sys.exit('Source image not found or not of the correct image format.')
+						print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
+						sys.exit(1)
 				except (IOError):
-					sys.exit('Pattern image not found or not of the correct image format.')
-					sys.exit()
+					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
+					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
 					self.sourceName = source.split('\\')[-1]
 					if self.sourceImage.format != "JPEG" and self.sourceImage.format != "GIF" and self.sourceImage.format != "PNG":
-						sys.exit('Source image not found or not of the correct image format.')	
+						print >>sys.stderr, 'Source image not found or not of the correct image format.'
+						sys.exit(1)
 				except (IOError):
-					sys.exit('Source image not found or not of the correct image format.')
-					sys.exit()
+					print >>sys.stderr, 'Source image not found or not of the correct image format.'
+					sys.exit(1)
 				
 				self.patternFormat = self.patternImage.format
 				self.sourceFormat = self.sourceImage.format
@@ -46,8 +48,10 @@ class ImageSearch:
 
 				if self.sourceImage.mode != "RGB":
 					self.sourceImage = self.sourceImage.convert("RGB")
-				# try to match the images	
+				# try to match the images
 				self.key_point_match()
+
+		# print all matches
 		for x in self.matches:
 			# print the match in the professor's format
 			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4]) + " with confidence " + str(x[5]) + "%"
@@ -111,11 +115,12 @@ class ImageSearch:
 				
 					if(percentage >= .3):
 						
+						# this also sets the confidence level self.current_confidence
 						isMatch = self.check_exact_match(xOffset, yOffset)				
 
 						if isMatch == True:
 
-							#inverse the confidence to get the real value, then change to percent, trim decimals
+							# inverse the confidence to get the real value, then change to percent, trim decimals
 							self.current_confidence = 1 - self.current_confidence
 							self.current_confidence = self.current_confidence * 100
 							confd = int(self.current_confidence)
@@ -134,7 +139,6 @@ class ImageSearch:
 	# be returned and compared
 	def find_unique_pixels(self, patPixelArray):
 		uniques = []				# holds the found unique values in the pattern image	
-		
 		
 		length = len(patPixelArray)
 		seperator = length/100						# a value to control what pixels are considered "unique"
@@ -188,6 +192,7 @@ class ImageSearch:
 				if(percentage_overlap >= .5):
 					if not self.matches[i][5] > image_info[5]:
 						self.matches[i] = image_info
+						print "REPLACED"
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):

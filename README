@@ -22,12 +22,21 @@ Example Usage with spims file
 
 ./spims -p TestImages/morning.png -s TestImages/morning.png
 
+OR 
+
+./spims -pdir TestImages/Patterns -sdir TestImages/Sources
+
+OR, can also be mixed between files and directores
+
+./spims -p TestImages/morning.png -sdir TestImages/Sources
+./spims -pdir TestImages/Patterns -s TestImages/morning.png
+
 Spims File
 -------------
 
 The spims file is located in the build directory and is allset to be used like:
 
-./spims -p path/to/pattern/image.jpg -s path/to/source/image.jpg
+./spims -pdir path/to/pattern/dir -sdir path/to/source/dir
 
 OR
 
@@ -36,7 +45,4 @@ To Make Spims File
 
 Make sure the parser location declaration (located at the top of the ImageSearch.py file) 
 is correct. The one already there should work on CCIS linux boxes. Then, make sure the file
-has execution permissions and rename the file to "spims". Run the program like the following 
-example
-
-./spims -p TestImages/morning.png -s TestImages/morning.png
+has execution permissions and rename the file to "spims".
