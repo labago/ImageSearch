@@ -14,41 +14,49 @@ class ImageSearch:
 		self.pattern_array = pattern_array
 		self.source_array = source_array
 		self.current_confidence = 0
+		self.matches = []
 
 	# function for matching two directories of images
 	def match_images(self):
 		for pattern in self.pattern_array:
 			for source in self.source_array:
 				try:
-					self.paternImage = Image.open(pattern)
-					self.patternName = pattern.split('/')[-1]
+					self.patternImage = Image.open(pattern)
+					self.patternName = pattern.split('\\')[-1]
+					if self.patternImage.format != "JPEG" and self.patternImage.format != "GIF" and self.patternImage.format != "PNG":
+						sys.exit('Source image not found or not of the correct image format.')
 				except (IOError):
-					print "Pattern image not found."
+					sys.exit('Pattern image not found or not of the correct image format.')
 					sys.exit()
 
 				try:
 					self.sourceImage = Image.open(source)
-					self.sourceName = source.split('/')[-1]
+					self.sourceName = source.split('\\')[-1]
+					if self.sourceImage.format != "JPEG" and self.sourceImage.format != "GIF" and self.sourceImage.format != "PNG":
+						sys.exit('Source image not found or not of the correct image format.')	
 				except (IOError):
-					print "Source image not found."
+					sys.exit('Source image not found or not of the correct image format.')
 					sys.exit()
 				
-				self.patternFormat = self.paternImage.format
+				self.patternFormat = self.patternImage.format
 				self.sourceFormat = self.sourceImage.format
 
-				if self.paternImage.mode != "RGB":
-					self.paternImage = self.paternImage.convert("RGB")
+				if self.patternImage.mode != "RGB":
+					self.patternImage = self.patternImage.convert("RGB")
 
 				if self.sourceImage.mode != "RGB":
 					self.sourceImage = self.sourceImage.convert("RGB")
 				# try to match the images	
 				self.key_point_match()
+		for x in self.matches:
+			# print the match in the professor's format
+			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4]) + " with confidence " + str(x[5]) + "%"
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
 
-		patternPixels = imageSearch.paternImage.load()
-		patSize = imageSearch.paternImage.size
+		patternPixels = imageSearch.patternImage.load()
+		patSize = imageSearch.patternImage.size
 
 		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
 
@@ -62,7 +70,7 @@ class ImageSearch:
 
 		uniques = imageSearch.find_unique_pixels(patPixelArray) # list of the unique pixels in the pattern image
 
-		patternPixels = self.paternImage.load()	# holds the pattern pixel information
+		patternPixels = self.patternImage.load()	# holds the pattern pixel information
 		sourcePixels = self.sourceImage.load()		# holds the source pixel information 
 
 		sourceWidth = self.sourceImage.size[0]		# width of the source image
@@ -112,8 +120,12 @@ class ImageSearch:
 							self.current_confidence = self.current_confidence * 100
 							confd = int(self.current_confidence)
 
-							# print the match in the professor's format
-							print self.patternName + " matches " + self.sourceName + " at "+ str(patSize[0]) + "x" + str(patSize[1]) + "+" + str(xOffset) + "+" + str(yOffset) + " with confidence " + str(confd) + "%"
+							# decide whether to add the match to the total array of matches, replace a match, or do not add
+							decision = self.new_or_better_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
+							if decision == "ADD":
+								self.matches.append((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
+							elif decision == "REPLACE":
+								self.replace_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
 				
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
@@ -138,6 +150,44 @@ class ImageSearch:
 				uniques.append(x)		
 
 		return uniques
+
+	# checks if this is a duplicate match/over-lapping match
+	def new_or_better_match(self, image_info):
+		for i in range(0, len(self.matches)):
+			# if the pattern and source names are the same we should check if the
+			# if the matched area are over lapping too much (50 percent)
+			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
+				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
+				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
+				xC = self.matches[i][2][0] - xOffsetDiff
+				yC = self.matches[i][2][1] - yOffsetDiff
+				overlap_area = (xC*yC)+0.0
+				image_area = (self.matches[i][2][0]*self.matches[i][2][1])+0.0
+				percentage_overlap = overlap_area/image_area
+				if(percentage_overlap >= .5):
+					if self.matches[i][5] > image_info[5]:
+						return "NO"
+					else:
+						return "REPLACE"
+				else:
+					return "ADD"
+		return "ADD"
+
+	def replace_match(self, image_info):
+		for i in range(0, len(self.matches)):
+			# if the pattern and source names are the same we should check if the
+			# if the matched area are over lapping too much (50 percent)
+			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
+				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
+				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
+				xC = self.matches[i][2][0] - xOffsetDiff
+				yC = self.matches[i][2][1] - yOffsetDiff
+				overlap_area = (xC*yC)+0.0
+				image_area = (self.matches[i][2][0]*self.matches[i][2][1])+0.0
+				percentage_overlap = overlap_area/image_area
+				if(percentage_overlap >= .5):
+					if not self.matches[i][5] > image_info[5]:
+						self.matches[i] = image_info
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
@@ -174,9 +224,9 @@ class ImageSearch:
 
 	def check_exact_match(self, xOffset, yOffset):
 		sourcePixels = self.sourceImage.load()
-		patternPixels = self.paternImage.load()
-		patternWidth = self.paternImage.size[0]
-		patternHeigth = self.paternImage.size[1]
+		patternPixels = self.patternImage.load()
+		patternWidth = self.patternImage.size[0]
+		patternHeigth = self.patternImage.size[1]
 		sourceWidth = self.sourceImage.size[0]
 		sourceHeight = self.sourceImage.size[1]
 
