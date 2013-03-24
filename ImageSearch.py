@@ -23,14 +23,14 @@ class ImageSearch:
 				try:
 					self.patternImage = Image.open(pattern)
 					self.patternName = pattern.split('/')[-1]
-				except (IOError):
+				except (IOError, IndexError):
 					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
 					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
 					self.sourceName = source.split('/')[-1]
-				except (IOError):
+				except (IOError, IndexError):
 					print >>sys.stderr, 'Source image not found or not of the correct image format.'
 					sys.exit(1)
 				
