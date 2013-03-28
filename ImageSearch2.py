@@ -3,8 +3,6 @@ from PIL import Image, ImageFilter, ImageChops
 import sys
 import os
 import math
-import scipy
-import numpy
 from datetime import datetime
 
 # a class to represent the ImageSearch application
@@ -123,9 +121,9 @@ class ImageSearch:
 		self.source_octaves = self.generate_gaussian_octavtes(self.sourceImage, "source_"+self.sourceName)
 
 		self.output_image_name = "Pattern"
-		self.find_octave_key_points(self.pattern_octaves)
+		pattern_keypoints = self.find_octave_key_points(self.pattern_octaves)
 		self.output_image_name = "Source"
-		self.find_octave_key_points(self.source_octaves)
+		source_keypoints = self.find_octave_key_points(self.source_octaves)
 
 	def generate_gaussian_octavtes(self, img, name):
 		results = []
@@ -148,7 +146,7 @@ class ImageSearch:
 				loc = "tmp/"+str(x)+"_"+str(y)+name
 
 				temp = []
-				temp.append(img)
+				temp.append(diff)
 
 				blurred.append(temp)
 				#diff.save(loc)
@@ -170,6 +168,7 @@ class ImageSearch:
 								keypoints.append((x, y))
 					octaves[octave][blurred] = (octaves[octave][blurred][0], keypoints)
 			self.plot_keypoints(octaves[0])
+			return octaves
 
 		# for octave in range(0, len(self.source_octaves)):
 		# 	for blurred in range(1, len(self.source_octaves[octave])-1):
@@ -184,18 +183,24 @@ class ImageSearch:
 		# 					source_keypoints.append((x, y))
 		# 		self.source_octaves[octave][blurred] = (self.source_octaves[octave][blurred], source_keypoints)
 
+
+	#plots the keypoints for the octaves over the pattern/source image (depending on which the keypoints are from)
+	#will create a new file for each octave
 	def plot_keypoints(self, octave):
 		for x in range(1, len(octave)-1):
 			image = octave[x][0]
 			keypoints = octave[x][1]
 			size = image.size
-			new = image.copy()
+			if self.output_image_name == "Pattern":
+				new = self.patternImage
+			else:
+				new = self.sourceImage
 			for y in keypoints:
 				new.putpixel(y, (0, 255, 0))
-				new.putpixel((y[0]+1, y[1]+1), (0, 255, 0))
-				new.putpixel((y[0]-1, y[1]+1), (0, 255, 0))
-				new.putpixel((y[0]+1, y[1]-1), (0, 255, 0))
-				new.putpixel((y[0]-1, y[1]-1), (0, 255, 0))
+				new.putpixel((y[0]+1 , y[1]+1), (0, 255, 0))
+				new.putpixel((y[0]-1 , y[1]+1), (0, 255, 0))
+				new.putpixel((y[0]+1 , y[1]-1), (0, 255, 0))
+				new.putpixel((y[0]-1 , y[1]-1), (0, 255, 0))
 			new.save("tmp/plotted"+self.output_image_name+str(x)+".jpg")
 
 
