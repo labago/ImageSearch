@@ -53,26 +53,27 @@ class ImageSearch:
 
 	# try to match images using the SIFT algorithm
 	def sift(self):
+	
+		################################## PATTERN IMAGE ###################################
 
 		# the current image, initilized to the patternImage
 		octave = self.patternImage
 		
-		# the format of the patternImage
-		currFM = self.patternImage.format
+		size = octave.size
 		
 		### Gaussian Blurs ########
 		
 		firstOctave = blur(octave)
 		
-		octave = octave.resize( (octave.size[0]/2, octave.size[1]/2) )
+		octave = octave.resize( (size[0]/2, size[1]/2) )
 		
 		secondOctave = blur(octave)
 		
-		octave = octave.resize( (octave.size[0]/2, octave.size[1]/2) )
+		octave = octave.resize( (size[0]/2, size[1]/2) )
 		
 		thirdOctave = blur(octave)
 		
-		octave = octave.resize( (octave.size[0]/2, octave.size[1]/2) )
+		octave = octave.resize( (size[0]/2, size[1]/2) )
 		
 		fourthOctave = blur(octave)
 
@@ -88,8 +89,60 @@ class ImageSearch:
 		
 		####### Locate Maxima/Minima ##########
 		
+		firstKeypoints = maxMin(firstOctave)
+		
+		secondKeypoints = maxMin(secondOctave)
+		
+		thirdKeypoints = maxMin(thirdOctave)
+		
+		fourthKeypoints = maxMin(fourthOctave)
 		
 		
+		#################################### SOURCE IMAGE ###################################
+		
+		octave_S = self.sourceImage
+		
+		size_S = octave_S.size
+		
+		###### Gaussian Blurs #########
+		
+		octaveOne = blur(octave_S)
+		
+		octave_S = octave_S.resize( (size_S[0]/2, size_S[1]/2) )
+		
+		octaveTwo = blur(octave_S)
+		
+		octave_S = octave_S.resize( (size_S[0]/2, size_S[1]/2) )
+		
+		octaveThree = blur(octave_S)
+		
+		octave_S = octave_S.resize( (size_S[0]/2, size_S[1]/2) )
+		
+		octaveFour = blur(octave_S)
+		
+		####### Difference of Gaussians ########
+		
+		octaveOne = diffGaus(octaveOne)
+		
+		octaveTwo = diffGaus(octaveTwo)
+	
+		octaveThree = diffGaus(octaveThree)
+		
+		octaveFour = diffGaus(octaveFour)
+		
+		####### Locate Maxima/Minima ##########
+		
+		keypointsOne = maxMin(octaveOne)
+		
+		keypointsTwo = maxMin(octaveTwo)
+		
+		keypointsThree = maxMin(octaveThree)
+		
+		keypointsFour = maxMin(octaveFour)
+		
+		
+		
+##################### Functions #########################
 		
 # creates 5 blur layers over an octave of an image
 def blur(image):
@@ -127,12 +180,15 @@ def diffGaus(octave):
 	return differences
 		
 # locates maxima and minima in Difference of Gaussian Images
+# returns a list of lists of keypoints
 def maxMin(octave):
 
 	# list of tuples of x,y coordinates of keypoints
-	keypoints = []
+	result = []
 
 	for x in range(1, len(octave)-1):
+	
+		keypoints = []
 	
 		top = octave[x-1]
 		middle = octave[x]
@@ -184,8 +240,10 @@ def maxMin(octave):
 						
 							keypoints.append((x,y))
 							
+		result.append(keypoints)
+							
 
-		return keypoints
+	return result
 		
 # gets the sum of the RGB values of the neighbors of a center pixel[x,y]
 # returns values in an array
@@ -306,19 +364,7 @@ def getNeighborsImage(data, x, y):
 		print "x and y values provided are on the edge; Not enough neighbors."
 
 
-'''		
 
-def printall(img):
-
-	size = img.size
-	
-	img = img.load()
-
-	for x in range(0, size[0]):
-		for y in range(0, size[1]):
-		
-			print img[x,y]
-'''
 
 ######### Input Checks ###############
 
