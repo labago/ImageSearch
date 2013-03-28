@@ -17,6 +17,7 @@ class ImageSearch:
 		self.source_array = source_array
 		self.current_confidence = 0
 		self.matches = []
+		self.output_image_name = ""
 
 	# function for matching two directories of images
 	def match_images(self):
@@ -60,8 +61,8 @@ class ImageSearch:
 					for y in range(0, self.sourceSize[1]):
 						self.sourcePixelArray.append((self.sourcePixels[x,y], x, y))
 
-				#self.sift()
-				self.SAD()
+				self.sift()
+				#self.SAD()
 
 		# print all matches
 		for x in self.matches:
@@ -121,7 +122,10 @@ class ImageSearch:
 		self.pattern_octaves = self.generate_gaussian_octavtes(self.patternImage, "pattern_"+self.patternName)
 		self.source_octaves = self.generate_gaussian_octavtes(self.sourceImage, "source_"+self.sourceName)
 
-		self.find_octave_key_points()
+		self.output_image_name = "Pattern"
+		self.find_octave_key_points(self.pattern_octaves)
+		self.output_image_name = "Source"
+		self.find_octave_key_points(self.source_octaves)
 
 	def generate_gaussian_octavtes(self, img, name):
 		results = []
@@ -151,21 +155,21 @@ class ImageSearch:
 			results.append(blurred)
 		return results
 
-	def find_octave_key_points(self):
-		for octave in range(0, len(self.pattern_octaves)):
-			for blurred in range(1, len(self.pattern_octaves[octave])-1):
-				pattern_keypoints = []
-				#print "Octave "+str(octave), "Blurred "+str(blurred)
-				patternPixels = self.pattern_octaves[octave][blurred][0].load()
-				patternPixels1 = self.pattern_octaves[octave][blurred-1][0].load()
-				patternPixels2 = self.pattern_octaves[octave][blurred+1][0].load()
-				patternSize = self.pattern_octaves[octave][blurred][0].size
-				for x in range(0,patternSize[0]):
-					for y in range(0, patternSize[1]):
-						if self.check_keypoint(patternPixels[x,y], self.sourounding_pixels(x, y, patternPixels, patternPixels1, patternPixels2)):
-							pattern_keypoints.append((x, y))
-				self.pattern_octaves[octave][blurred] = (self.pattern_octaves[octave][blurred][0], pattern_keypoints)
-		self.plot_keypoints(self.pattern_octaves[0])
+	def find_octave_key_points(self, octaves):
+			for octave in range(0, len(octaves)):
+				for blurred in range(1, len(octaves[octave])-1):
+					keypoints = []
+					#print "Octave "+str(octave), "Blurred "+str(blurred)
+					imgPixels = octaves[octave][blurred][0].load()
+					imgPixels1 = octaves[octave][blurred-1][0].load()
+					imgPixels2 = octaves[octave][blurred+1][0].load()
+					imgSize = octaves[octave][blurred][0].size
+					for x in range(0,imgSize[0]):
+						for y in range(0, imgSize[1]):
+							if self.check_keypoint(imgPixels[x,y], self.sourounding_pixels(x, y, imgPixels, imgPixels1, imgPixels2)):
+								keypoints.append((x, y))
+					octaves[octave][blurred] = (octaves[octave][blurred][0], keypoints)
+			self.plot_keypoints(octaves[0])
 
 		# for octave in range(0, len(self.source_octaves)):
 		# 	for blurred in range(1, len(self.source_octaves[octave])-1):
@@ -185,10 +189,14 @@ class ImageSearch:
 			image = octave[x][0]
 			keypoints = octave[x][1]
 			size = image.size
-			new = Image.new("RGB", size)
+			new = image.copy()
 			for y in keypoints:
-				new.putpixel(y, (255, 255, 255))
-			new.save("tmp/plotted"+str(x)+".jpg")
+				new.putpixel(y, (0, 255, 0))
+				new.putpixel((y[0]+1, y[1]+1), (0, 255, 0))
+				new.putpixel((y[0]-1, y[1]+1), (0, 255, 0))
+				new.putpixel((y[0]+1, y[1]-1), (0, 255, 0))
+				new.putpixel((y[0]-1, y[1]-1), (0, 255, 0))
+			new.save("tmp/plotted"+self.output_image_name+str(x)+".jpg")
 
 
 	def check_keypoint(self, pixel, sourounding):
