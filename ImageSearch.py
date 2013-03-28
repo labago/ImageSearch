@@ -52,8 +52,8 @@ class ImageSearch:
 	# try to match these two images based on important pixels
 	def key_point_match(self):
 
-		patternPixels = imageSearch.patternImage.load()
-		patSize = imageSearch.patternImage.size
+		patternPixels = self.patternImage.load()
+		patSize = self.patternImage.size
 
 		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
 
@@ -65,7 +65,7 @@ class ImageSearch:
 		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
 
 
-		uniques = imageSearch.find_unique_pixels(patPixelArray) # list of the unique pixels in the pattern image
+		uniques = self.find_unique_pixels(patPixelArray) # list of the unique pixels in the pattern image
 
 		patternPixels = self.patternImage.load()	# holds the pattern pixel information
 		sourcePixels = self.sourceImage.load()		# holds the source pixel information 
