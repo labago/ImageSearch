@@ -246,6 +246,8 @@ class ImageSearch:
 			return False
 ##################### Functions #########################
 
+# collects the average contrast of all pixels, and filters out the octave_keypoints
+# that are greater than the average
 def filter_out_low_contrast(octave, octave_keypoints):
 	new_keypoints = []
 	for blur in octave:
@@ -268,6 +270,7 @@ def filter_out_low_contrast(octave, octave_keypoints):
 		new_keypoints.append(new_pixels)
 		counter += 1
 	return new_keypoints
+
 
 def filter_by_gradient(octave, octave_keypoints):
 	new_keypoints = []
@@ -301,8 +304,10 @@ def goodGradient(pixel, neighbors):
 
 	if checkMinimum(pixel_value, right) and checkMaximum(pixel_value, left):
 		return True
+	'''
 	elif checkMinimum(pixel_value, left) and checkMaximum(pixel_value, right):
 		return True
+	'''
 	return False
 	
 def plot_keypoints(image, keypoints, name):
