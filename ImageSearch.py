@@ -53,6 +53,13 @@ class ImageSearch:
 
 				self.sourcePixels = self.sourceImage.load()
 				self.sourceSize = self.sourceImage.size
+				
+				if self.sourceSize[0]*self.sourceSize[1] > 1000000:
+					
+					#self.sourceSize = (self.sourceSize[0]/2, self.sourceSize[1]/2)
+					self.sourceImage = self.sourceImage.resize(self.patSize, Image.ANTIALIAS)
+					self.sourcePixels = self.sourceImage.load()
+				
 				'''
 				self.sourcePixelArray = []
 				for x in range(0, self.sourceSize[0]):
@@ -202,7 +209,7 @@ class ImageSearch:
 	def new_or_better_match(self, image_info):
 		for i in range(0, len(self.matches)):
 			# if the pattern and source names are the same we should check if the
-			# if the matched area are over lapping too much (50 percent)
+			# matched area are over lapping too much (50 percent)
 			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
 				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
 				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
@@ -271,7 +278,7 @@ def filter_out_low_contrast(octave, octave_keypoints):
 		counter += 1
 	return new_keypoints
 
-
+# filters out keypoints in octave_keypoints that do not have a gradient
 def filter_by_gradient(octave, octave_keypoints):
 	new_keypoints = []
 	for blur in octave:
@@ -287,6 +294,7 @@ def filter_by_gradient(octave, octave_keypoints):
 		counter += 1
 	return new_keypoints
 
+# checks a pixel against its left and right neighbors to see if a gradient exists
 def goodGradient(pixel, neighbors):
 	pixel_value = pixel[0]+pixel[1]+pixel[2]
 
@@ -304,17 +312,17 @@ def goodGradient(pixel, neighbors):
 
 	if checkMinimum(pixel_value, right) and checkMaximum(pixel_value, left):
 		return True
-	'''
+	
 	elif checkMinimum(pixel_value, left) and checkMaximum(pixel_value, right):
 		return True
-	'''
+		
 	return False
 	
+# plots the keypoints found in the pattern image onto the pattern image
 def plot_keypoints(image, keypoints, name):
 	image = Image.new(image.mode, image.size)
 	for y in keypoints:
 		image.putpixel(y, (0, 255, 0))
-	#image.save("tmp/"+name)
 	image.save(name)
 
 # creates 5 blur layers over an octave of an image
@@ -535,16 +543,30 @@ def checkMaximum(center, neighbors):
 
 # used to check if an image format is supported by the program
 # Arguments: fileLoc is the file location and imgtype is the type of input (pattern, source, etc.)
-def checkFormat(fileLoc, imgtype):
+def checkFormat(fileLoc, imgtype): #, p):
+
+	#path = p.split(fileLoc)[0] + '/'   # gets the path that leads to 'fileLoc'
+
 	try:
 		frm = Image.open(fileLoc).format
 	except (IndexError):
 		print >>sys.stderr, 'Corrupted Image/File Found'
 		sys.exit(1)
 		
+<<<<<<< HEAD
 	if frm != 'JPG' and frm != 'JPEG' and frm != 'PNG' and frm != 'GIF':
+=======
+	if frm != 'jpg' and frm != 'jpeg' and frm != 'png' and frm != 'gif':
+	
+		#img = os.path.join(path, fileLoc)
+		
+		#os.remove(img)
+		
+>>>>>>> Works relatively well
 		print >>sys.stderr, 'Unsupported file format: ' + '.' + frm + " in " + imgtype
+		print 'File deleted from directory'
 		sys.exit(1)
+		
 		
 # used to check if a directory has any subdirectories. Exits with exit code 1 if true
 # Arguments: fileLoc is the file location and direc is the type of directory: pattern or source
@@ -607,7 +629,11 @@ for x in range(0, len(sys.argv)):
 		# check for subdirectories and unsupported file formats
 		for f in os.listdir(source_dir):
 			checkSubDir(f, 'source directory', source_dir)
+<<<<<<< HEAD
 			checkFormat(source_dir+"/"+f, 'source directory')
+=======
+			checkFormat(f, 'source directory') #, source_dir)
+>>>>>>> Works relatively well
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
@@ -617,13 +643,22 @@ for x in range(0, len(sys.argv)):
 		checkExistence(pattern_dir, 'pattern directory')
 		
 		# check for subdirectories and unsupported file formats
+<<<<<<< HEAD
 		try:
 			for f in os.listdir(pattern_dir):
 				checkSubDir(f, 'pattern directory', pattern_dir)
 				checkFormat(pattern_dir+"/"+f, 'pattern directory')
+=======
+		#try:
+		for f in os.listdir(pattern_dir):
+			checkSubDir(f, 'pattern directory', pattern_dir)
+			checkFormat(f, 'pattern directory') #, pattern_dir)
+		'''
+>>>>>>> Works relatively well
 		except (WindowsError):
 			print >>sys.stderr, 'The directory name is invalid'
 			sys.exit(1)
+		'''
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):
