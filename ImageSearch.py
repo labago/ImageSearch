@@ -22,14 +22,14 @@ class ImageSearch:
 			for source in self.source_array:
 				try:
 					self.patternImage = Image.open(pattern)
-					self.patternName = pattern.split('/')[-1]
+					self.patternName = pattern.split('\\')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
 					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
-					self.sourceName = source.split('/')[-1]
+					self.sourceName = source.split('\\')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Source image not found or not of the correct image format.'
 					sys.exit(1)
@@ -543,30 +543,16 @@ def checkMaximum(center, neighbors):
 
 # used to check if an image format is supported by the program
 # Arguments: fileLoc is the file location and imgtype is the type of input (pattern, source, etc.)
-def checkFormat(fileLoc, imgtype): #, p):
-
-	#path = p.split(fileLoc)[0] + '/'   # gets the path that leads to 'fileLoc'
-
+def checkFormat(fileLoc, imgtype):
 	try:
 		frm = Image.open(fileLoc).format
 	except (IndexError):
 		print >>sys.stderr, 'Corrupted Image/File Found'
 		sys.exit(1)
 		
-<<<<<<< HEAD
 	if frm != 'JPG' and frm != 'JPEG' and frm != 'PNG' and frm != 'GIF':
-=======
-	if frm != 'jpg' and frm != 'jpeg' and frm != 'png' and frm != 'gif':
-	
-		#img = os.path.join(path, fileLoc)
-		
-		#os.remove(img)
-		
->>>>>>> Works relatively well
 		print >>sys.stderr, 'Unsupported file format: ' + '.' + frm + " in " + imgtype
-		print 'File deleted from directory'
 		sys.exit(1)
-		
 		
 # used to check if a directory has any subdirectories. Exits with exit code 1 if true
 # Arguments: fileLoc is the file location and direc is the type of directory: pattern or source
@@ -629,11 +615,7 @@ for x in range(0, len(sys.argv)):
 		# check for subdirectories and unsupported file formats
 		for f in os.listdir(source_dir):
 			checkSubDir(f, 'source directory', source_dir)
-<<<<<<< HEAD
 			checkFormat(source_dir+"/"+f, 'source directory')
-=======
-			checkFormat(f, 'source directory') #, source_dir)
->>>>>>> Works relatively well
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
@@ -643,22 +625,13 @@ for x in range(0, len(sys.argv)):
 		checkExistence(pattern_dir, 'pattern directory')
 		
 		# check for subdirectories and unsupported file formats
-<<<<<<< HEAD
 		try:
 			for f in os.listdir(pattern_dir):
 				checkSubDir(f, 'pattern directory', pattern_dir)
 				checkFormat(pattern_dir+"/"+f, 'pattern directory')
-=======
-		#try:
-		for f in os.listdir(pattern_dir):
-			checkSubDir(f, 'pattern directory', pattern_dir)
-			checkFormat(f, 'pattern directory') #, pattern_dir)
-		'''
->>>>>>> Works relatively well
 		except (WindowsError):
 			print >>sys.stderr, 'The directory name is invalid'
 			sys.exit(1)
-		'''
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):

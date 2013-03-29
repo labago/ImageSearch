@@ -53,6 +53,13 @@ class ImageSearch:
 
 				self.sourcePixels = self.sourceImage.load()
 				self.sourceSize = self.sourceImage.size
+				
+				if self.sourceSize[0]*self.sourceSize[1] > 1000000:
+					
+					#self.sourceSize = (self.sourceSize[0]/2, self.sourceSize[1]/2)
+					self.sourceImage = self.sourceImage.resize(self.patSize, Image.ANTIALIAS)
+					self.sourcePixels = self.sourceImage.load()
+				
 				'''
 				self.sourcePixelArray = []
 				for x in range(0, self.sourceSize[0]):
@@ -202,7 +209,7 @@ class ImageSearch:
 	def new_or_better_match(self, image_info):
 		for i in range(0, len(self.matches)):
 			# if the pattern and source names are the same we should check if the
-			# if the matched area are over lapping too much (50 percent)
+			# matched area are over lapping too much (50 percent)
 			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
 				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
 				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
@@ -271,7 +278,7 @@ def filter_out_low_contrast(octave, octave_keypoints):
 		counter += 1
 	return new_keypoints
 
-
+# filters out keypoints in octave_keypoints that do not have a gradient
 def filter_by_gradient(octave, octave_keypoints):
 	new_keypoints = []
 	for blur in octave:
@@ -287,6 +294,7 @@ def filter_by_gradient(octave, octave_keypoints):
 		counter += 1
 	return new_keypoints
 
+# checks a pixel against its left and right neighbors to see if a gradient exists
 def goodGradient(pixel, neighbors):
 	pixel_value = pixel[0]+pixel[1]+pixel[2]
 
@@ -304,17 +312,17 @@ def goodGradient(pixel, neighbors):
 
 	if checkMinimum(pixel_value, right) and checkMaximum(pixel_value, left):
 		return True
-	'''
+	
 	elif checkMinimum(pixel_value, left) and checkMaximum(pixel_value, right):
 		return True
-	'''
+		
 	return False
 	
+# plots the keypoints found in the pattern image onto the pattern image
 def plot_keypoints(image, keypoints, name):
 	image = Image.new(image.mode, image.size)
 	for y in keypoints:
 		image.putpixel(y, (0, 255, 0))
-	#image.save("tmp/"+name)
 	image.save(name)
 
 # creates 5 blur layers over an octave of an image
