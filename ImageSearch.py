@@ -613,9 +613,13 @@ for x in range(0, len(sys.argv)):
 		checkExistence(source_dir, 'source directory')
 
 		# check for subdirectories and unsupported file formats
-		for f in os.listdir(source_dir):
-			checkSubDir(f, 'source directory', source_dir)
-			checkFormat(source_dir+"/"+f, 'source directory')
+		try:
+			for f in os.listdir(source_dir):
+				checkSubDir(f, 'source directory', source_dir)
+				checkFormat(source_dir+"/"+f, 'source directory')
+		except (OSError):
+			print >>sys.stderr, 'The source directory name is invalid'
+			sys.exit(1)
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
@@ -629,8 +633,8 @@ for x in range(0, len(sys.argv)):
 			for f in os.listdir(pattern_dir):
 				checkSubDir(f, 'pattern directory', pattern_dir)
 				checkFormat(pattern_dir+"/"+f, 'pattern directory')
-		except (WindowsError):
-			print >>sys.stderr, 'The directory name is invalid'
+		except (OSError):
+			print >>sys.stderr, 'The pattern directory name is invalid'
 			sys.exit(1)
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
