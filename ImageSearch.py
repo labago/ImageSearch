@@ -308,7 +308,8 @@ def plot_keypoints(image, keypoints, name):
 	image = Image.new(image.mode, image.size)
 	for y in keypoints:
 		image.putpixel(y, (0, 255, 0))
-	image.save("tmp/"+name)
+	#image.save("tmp/"+name)
+	image.save(name)
 
 # creates 5 blur layers over an octave of an image
 def blur(image):
