@@ -53,11 +53,12 @@ class ImageSearch:
 
 				self.sourcePixels = self.sourceImage.load()
 				self.sourceSize = self.sourceImage.size
+				'''
 				self.sourcePixelArray = []
 				for x in range(0, self.sourceSize[0]):
 					for y in range(0, self.sourceSize[1]):
 						self.sourcePixelArray.append((self.sourcePixels[x,y], x, y))
-
+				'''
 				if (self.patSize[0]*self.patSize[1]) > 300:
 					self.sift()
 				else:
@@ -83,27 +84,27 @@ class ImageSearch:
 		
 		PatternOctaveOne = blur(PatternOctave)
 		
-		# PatternOctave = PatternOctave.resize( (patternSize[0]/2, patternSize[1]/2) )
+	  #PatternOctave = PatternOctave.resize( (patternSize[0]/2, patternSize[1]/2) )
 		
-		# PatternOctaveTwo = blur(PatternOctave)
+		#PatternOctaveTwo = blur(PatternOctave)
 		
-		# PatternOctave = PatternOctave.resize( (patternSize[0]/4, patternSize[1]/4) )
+		#PatternOctave = PatternOctave.resize( (patternSize[0]/4, patternSize[1]/4) )
 		
-		# PatternOctaveThree = blur(PatternOctave)
+		#PatternOctaveThree = blur(PatternOctave)
 		
-		# PatternOctave = PatternOctave.resize( (patternSize[0]/8, patternSize[1]/8) )
+		#PatternOctave = PatternOctave.resize( (patternSize[0]/8, patternSize[1]/8) )
 		
-		# PatternOctaveFour = blur(PatternOctave)
+		#PatternOctaveFour = blur(PatternOctave)
 		
 		####### Difference of Gaussians ########
 		
-		PatternOctaveOne = diffGaus(PatternOctaveOne)
+		#PatternOctaveOne = diffGaus(PatternOctaveOne)
 		
 		# PatternOctaveTwo = diffGaus(PatternOctaveTwo)
 	
 		# PatternOctaveThree = diffGaus(PatternOctaveThree)
 		
-		# PatternOctaveFour = diffGaus(PatternOctaveFour)
+		#PatternOctaveFour = diffGaus(PatternOctaveFour)
 		
 		####### Locate Maxima/Minima ##########
 		
