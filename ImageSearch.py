@@ -537,12 +537,12 @@ def checkMaximum(center, neighbors):
 # Arguments: fileLoc is the file location and imgtype is the type of input (pattern, source, etc.)
 def checkFormat(fileLoc, imgtype):
 	try:
-		frm = fileLoc.split('.')[1]
+		frm = Image.open(fileLoc).format
 	except (IndexError):
 		print >>sys.stderr, 'Corrupted Image/File Found'
 		sys.exit(1)
 		
-	if frm != 'jpg' and frm != 'jpeg' and frm != 'png' and frm != 'gif':
+	if frm != 'JPG' and frm != 'JPEG' and frm != 'PNG' and frm != 'GIF':
 		print >>sys.stderr, 'Unsupported file format: ' + '.' + frm + " in " + imgtype
 		sys.exit(1)
 		
@@ -607,7 +607,7 @@ for x in range(0, len(sys.argv)):
 		# check for subdirectories and unsupported file formats
 		for f in os.listdir(source_dir):
 			checkSubDir(f, 'source directory', source_dir)
-			checkFormat(f, 'source directory')
+			checkFormat(source_dir+"/"+f, 'source directory')
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
@@ -620,7 +620,7 @@ for x in range(0, len(sys.argv)):
 		try:
 			for f in os.listdir(pattern_dir):
 				checkSubDir(f, 'pattern directory', pattern_dir)
-				checkFormat(f, 'pattern directory')
+				checkFormat(pattern_dir+"/"+f, 'pattern directory')
 		except (WindowsError):
 			print >>sys.stderr, 'The directory name is invalid'
 			sys.exit(1)
