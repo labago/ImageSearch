@@ -9,7 +9,7 @@ from datetime import datetime
 class ImageSearch:
 
 	# constructor, takes the pattern image location string and source image location string
-	# if either image is not found, termiinate program and alert user
+	# if either image/directory is not found, terminate program and alert user
 	def __init__(self, pattern_array, source_array):
 		self.pattern_array = pattern_array
 		self.source_array = source_array
@@ -65,7 +65,7 @@ class ImageSearch:
 
 		# print all matches
 		for x in self.matches:
-			# print the match in the professor's format
+			# print the match in the spec's format
 			# removed confidence level printing ---->  + " with confidence " + str(x[5]) + "%"
 			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])+ " (with "+ str(x[5]*100) + "% confidence)"
 
@@ -108,7 +108,7 @@ class ImageSearch:
 		####### Locate Maxima/Minima ##########
 		
 		PatternKeypointsOne = filter_by_gradient(PatternOctaveOne[1:3], filter_out_low_contrast(PatternOctaveOne[1:3], maxMin(PatternOctaveOne)))
-		#plot_keypoints(self.patternImage, PatternKeypointsOne[0], "patternTest.png")
+		plot_keypoints(self.patternImage, PatternKeypointsOne[0], "patternTest.png")
 		
 		# PatternKeypointsTwo = filter_by_gradient(PatternOctaveTwo[1:3], filter_out_low_contrast(PatternOctaveTwo[1:3], maxMin(PatternOctaveTwo)))
 
@@ -166,17 +166,18 @@ class ImageSearch:
 		maxXoffset = (self.sourceImage.size[0]-self.patternImage.size[0])+1
 		maxYoffset = (self.sourceImage.size[1]-self.patternImage.size[1])+1
 
-		for x in range(0, maxXoffset):
-			for y in range(0, maxYoffset):
-				misses = 0
-				for point in pattern_keypoints:
-					if not misses > maxMisses:
-						pattern_pixel = self.patternPixels[point[0], point[1]]
-						source_pixel = self.sourcePixels[point[0]+x, point[1]+y]
-						if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
-							misses += 1
-				if misses <= maxMisses:
-					self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1-(misses/len(pattern_keypoints))))
+		if len(pattern_keypoints) > 0:
+			for x in range(0, maxXoffset):
+				for y in range(0, maxYoffset):
+					misses = 0
+					for point in pattern_keypoints:
+						if not misses > maxMisses:
+							pattern_pixel = self.patternPixels[point[0], point[1]]
+							source_pixel = self.sourcePixels[point[0]+x, point[1]+y]
+							if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
+								misses += 1
+					if misses <= maxMisses:
+						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1-(misses/len(pattern_keypoints))))
 		return False
 
 	def is_match_brute_force(self):
