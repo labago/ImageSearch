@@ -109,7 +109,7 @@ class ImageSearch:
 		####### Locate Maxima/Minima ##########
 		
 		PatternKeypointsOne = filter_by_gradient(PatternOctaveOne[1:3], filter_out_low_contrast(PatternOctaveOne[1:3], maxMin(PatternOctaveOne)))
-		plot_keypoints(self.patternImage, PatternKeypointsOne[0], "patternTest.png")
+		# plot_keypoints(self.patternImage, PatternKeypointsOne[0], "patternTest.png")
 		
 		# PatternKeypointsTwo = filter_by_gradient(PatternOctaveTwo[1:3], filter_out_low_contrast(PatternOctaveTwo[1:3], maxMin(PatternOctaveTwo)))
 
