@@ -129,6 +129,7 @@ class ImageSearch:
 					misses = 0
 					for point in pattern_keypoints:
 						if not misses > maxMisses:
+							missed = False
 							pattern_pixel = pattern_keypoints[point]
 
 							point_str = point.split("-")
@@ -141,10 +142,12 @@ class ImageSearch:
 							try:
 								source_pixel = source_keypoints[source_point]
 							except(KeyError):
-								misses += 1
-								break
+								missed = True
 
-							if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
+							if not missed:
+								if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
+									misses += 1
+							else:
 								misses += 1
 					if misses < maxMisses:
 						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, round(1-((misses+0.0)/(len(pattern_keypoints)+0.0)), 2)))
