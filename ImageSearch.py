@@ -22,14 +22,14 @@ class ImageSearch:
 			for source in self.source_array:
 				try:
 					self.patternImage = Image.open(pattern)
-					self.patternName = pattern.split('/')[-1]
+					self.patternName = pattern.split('\\')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
 					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
-					self.sourceName = source.split('/')[-1]
+					self.sourceName = source.split('\\')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Source image not found or not of the correct image format.'
 					sys.exit(1)
@@ -83,7 +83,7 @@ class ImageSearch:
 					if y+self.patSize[1] <= self.sourceSize[1]:
 						diff = self.get_SAD_diff(x, y)
 						if diff == 0:
-							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 100))
+							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1))
 
 	def get_SAD_diff(self, xoffset, yoffset):
 		total_diff = 0
@@ -122,17 +122,11 @@ class ImageSearch:
 		
 		PatternKeypoints = self.maxMin(PatternOctave, self.patternPixels)
 
-		print len(PatternKeypoints)
-
 		if len(PatternKeypoints) > 100:
 			PatternKeypoints = filter_out_low_contrast(PatternOctave[0], PatternKeypoints, self.patPixelArray)
 
-		print len(PatternKeypoints)
-
 		if len(PatternKeypoints) > 50:
 			PatternKeypoints = filter_by_gradient(PatternOctave[0], PatternKeypoints, self.patternPixels)
-
-		print len(PatternKeypoints)
 
 		plot_keypoints(self.patternImage, PatternKeypoints, "patternTest.png")
 
@@ -324,7 +318,11 @@ def filter_by_gradient(blur, octave_keypoints, pixels):
 		neighbors = getNeighborsDict(pixels, xc, yc)
 		if goodGradient(pixel, neighbors):
 			new_keypoints[x] = octave_keypoints[x]
-	return new_keypoints
+
+	if len(new_keypoints) > 1:
+		return new_keypoints
+	else:
+		return octave_keypoints
 
 # collects the average contrast of all pixels, and filters out the octave_keypoints
 # that are greater than the average
@@ -341,7 +339,11 @@ def filter_out_low_contrast(blur, octave_keypoints, pixels):
 		pixel_contrast = pixel[0] + pixel[1] + pixel[2]
 		if pixel_contrast < (avg_contrast):
 			new_keypoints[x] = octave_keypoints[x]
-	return new_keypoints
+
+	if len(new_keypoints) > 1:
+		return new_keypoints
+	else:
+		return octave_keypoints
 
 # checks a pixel against its left and right neighbors to see if a gradient exists
 def goodGradient(pixel, neighbors):
