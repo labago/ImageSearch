@@ -54,22 +54,51 @@ class ImageSearch:
 				self.sourcePixels = self.sourceImage.load()
 				self.sourceSize = self.sourceImage.size
 				
-				'''
 				self.sourcePixelArray = []
 				for x in range(0, self.sourceSize[0]):
 					for y in range(0, self.sourceSize[1]):
 						self.sourcePixelArray.append((self.sourcePixels[x,y], x, y))
-				'''
+	
 				if (self.patSize[0]*self.patSize[1]) > 300:
 					self.sift()
 				else:
-					self.is_match_brute_force()
+					self.SAD()
 
 		# print all matches
 		for x in self.matches:
 			# print the match in the spec's format
 			# removed confidence level printing ---->  + " with confidence " + str(x[5]) + "%"
 			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])+ " (with "+ str(x[5]*100) + "% confidence)"
+
+  #########################################################
+  ### SAD ALGORITHM, ONLY USE ON SMALL IMAGES VERY SLOW ###
+  #########################################################
+	def SAD(self):
+		xOffset = 0
+		yOffset = 0
+
+		for x in range(0, self.sourceSize[0]):
+			if x+self.patSize[0] <= self.sourceSize[0]:
+				for y in range(0, self.sourceSize[1]):
+					if y+self.patSize[1] <= self.sourceSize[1]:
+						diff = self.get_SAD_diff(x, y)
+						if diff == 0:
+							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 100))
+
+	def get_SAD_diff(self, xoffset, yoffset):
+		total_diff = 0
+
+		for x in range(0, self.patSize[0]):
+			for y in range(0, self.patSize[1]):
+				sourcePixel = self.sourcePixels[x+xoffset, y+yoffset]
+				patternPixel = self.patternPixels[x, y]
+				total_diff += (abs(sourcePixel[0]-patternPixel[0])+abs(sourcePixel[1]-patternPixel[1])+abs(sourcePixel[2]-patternPixel[2]))    
+
+		return total_diff
+
+  #########################
+  ### END SAD ALGORITHM ###
+  #########################
 
 	# try to match images using the SIFT algorithm
 	def sift(self):
@@ -83,17 +112,29 @@ class ImageSearch:
 		
 		###### Gaussian Blurs #########
 		
-		PatternOctaveOne = blur(PatternOctave)
+		PatternOctave = blur(PatternOctave)
 		
 		####### Difference of Gaussians ########
 		
-		PatternOctaveOne = diffGaus(PatternOctaveOne, self.patternImage)
+		PatternOctave = diffGaus(PatternOctave, self.patternImage)
 
 		####### Locate Maxima/Minima ##########
 		
-		PatternKeypointsOne = self.filter_by_gradient(PatternOctaveOne[0], 
-								filter_out_low_contrast(PatternOctaveOne[0], self.maxMin(PatternOctaveOne, self.patternPixels)), self.patternPixels)
-		plot_keypoints(self.patternImage, PatternKeypointsOne, "patternTest.png")
+		PatternKeypoints = self.maxMin(PatternOctave, self.patternPixels)
+
+		print len(PatternKeypoints)
+
+		if len(PatternKeypoints) > 100:
+			PatternKeypoints = filter_out_low_contrast(PatternOctave[0], PatternKeypoints, self.patPixelArray)
+
+		print len(PatternKeypoints)
+
+		if len(PatternKeypoints) > 50:
+			PatternKeypoints = filter_by_gradient(PatternOctave[0], PatternKeypoints, self.patternPixels)
+
+		print len(PatternKeypoints)
+
+		plot_keypoints(self.patternImage, PatternKeypoints, "patternTest.png")
 
 		################################## SOURCE IMAGE ###################################
 		SourceOctave = self.sourceImage
@@ -102,20 +143,23 @@ class ImageSearch:
 		
 		###### Gaussian Blurs #########
 		
-		SourceOctaveOne = blur(SourceOctave)
+		SourceOctave = blur(SourceOctave)
 		
 		####### Difference of Gaussians ########
 		
-		SourceOctaveOne = diffGaus(SourceOctaveOne, self.sourceImage)
+		SourceOctave = diffGaus(SourceOctave, self.sourceImage)
 
 		####### Locate Maxima/Minima ##########
 		
-		SourceKeypointsOne = self.filter_by_gradient(SourceOctaveOne[0], 
-								filter_out_low_contrast(SourceOctaveOne[0], self.maxMin(SourceOctaveOne, self.sourcePixels)), self.sourcePixels)
+		SourceKeypoints = self.maxMin(SourceOctave, self.sourcePixels)
 
-		plot_keypoints(self.sourceImage, SourceKeypointsOne, "sourceTest.png")
+		# SourceKeypoints = filter_out_low_contrast(SourceOctave[0], SourceKeypoints, self.sourcePixelArray)
+
+		#SourceKeypoints = filter_by_gradient(SourceOctave[0], SourceKeypoints, self.sourcePixels)
+
+		plot_keypoints(self.sourceImage, SourceKeypoints, "sourceTest.png")
 				
-		self.is_match(PatternKeypointsOne, SourceKeypointsOne)
+		self.is_match(PatternKeypoints, SourceKeypoints)
 
 
 	def is_match(self, pattern_keypoints, source_keypoints):
@@ -151,24 +195,6 @@ class ImageSearch:
 								misses += 1
 					if misses < maxMisses:
 						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, round(1-((misses+0.0)/(len(pattern_keypoints)+0.0)), 2)))
-		return False
-
-	def is_match_brute_force(self):
-		maxMisses = len(self.patPixelArray)/8
-		maxXoffset = (self.sourceImage.size[0]-self.patternImage.size[0])+1
-		maxYoffset = (self.sourceImage.size[1]-self.patternImage.size[1])+1
-
-		for x in range(0, maxXoffset):
-			for y in range(0, maxYoffset):
-				misses = 0
-				for point in self.patPixelArray:
-					if not misses > maxMisses:
-						pattern_pixel = self.patternPixels[point[1], point[2]]
-						source_pixel = self.sourcePixels[point[1]+x, point[2]+y]
-						if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
-							misses += 1
-				if misses <= maxMisses:
-					self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1-(misses/len(self.patPixelArray))))
 		return False
 
 	def new_or_better_match(self, image_info):
@@ -282,39 +308,38 @@ class ImageSearch:
 
 		return result[0]
 
-	# filters out keypoints in octave_keypoints that do not have a gradient
-	def filter_by_gradient(self, blur, octave_keypoints, pixels):
-		new_keypoints = {}
-		for x in octave_keypoints:
-			pixel = octave_keypoints[x]
-
-			point_str = x.split("-")
-
-			xc = int(point_str[0])
-			yc = int(point_str[1])
-
-			neighbors = getNeighborsDict(pixels, xc, yc)
-			if goodGradient(pixel, neighbors):
-				new_keypoints[x] = octave_keypoints[x]
-		return new_keypoints
 ##################### Functions #########################
+
+# filters out keypoints in octave_keypoints that do not have a gradient
+def filter_by_gradient(blur, octave_keypoints, pixels):
+	new_keypoints = {}
+	for x in octave_keypoints:
+		pixel = octave_keypoints[x]
+
+		point_str = x.split("-")
+
+		xc = int(point_str[0])
+		yc = int(point_str[1])
+
+		neighbors = getNeighborsDict(pixels, xc, yc)
+		if goodGradient(pixel, neighbors):
+			new_keypoints[x] = octave_keypoints[x]
+	return new_keypoints
 
 # collects the average contrast of all pixels, and filters out the octave_keypoints
 # that are greater than the average
-def filter_out_low_contrast(blur, octave_keypoints):
-	pixels = blur.load()
+def filter_out_low_contrast(blur, octave_keypoints, pixels):
 	total_contrast = 0
 	total_pixels = 0
-	for x in octave_keypoints:
-		pixel = octave_keypoints[x]
-		total_contrast += pixel[0] + pixel[1] + pixel[2]
+	for x in pixels:
+		total_contrast += x[0][0] + x[0][1] + x[0][2]
 		total_pixels += 1
 	avg_contrast = total_contrast/total_pixels
 	new_keypoints = {}
 	for x in octave_keypoints:
 		pixel = octave_keypoints[x]
 		pixel_contrast = pixel[0] + pixel[1] + pixel[2]
-		if pixel_contrast < (avg_contrast*.5):
+		if pixel_contrast < (avg_contrast):
 			new_keypoints[x] = octave_keypoints[x]
 	return new_keypoints
 
