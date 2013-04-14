@@ -575,7 +575,12 @@ for x in range(0, len(sys.argv)):
 
 	if(str(sys.argv[x]) == '-p'):
 		
-		pattern = str(sys.argv[x+1])
+		try:
+			pattern = str(sys.argv[x+1])
+		except(IndexError):
+			print >>sys.stderr, 'There was a problem parsing the command line arguments'
+			sys.exit(1)
+
 
 		# check if file exists
 		checkExistence(pattern, 'pattern image')
@@ -585,7 +590,11 @@ for x in range(0, len(sys.argv)):
 
 	if(str(sys.argv[x]) == '-s'):
 
-		source = str(sys.argv[x+1])
+		try:
+			source = str(sys.argv[x+1])
+		except(IndexError):
+			print >>sys.stderr, 'There was a problem parsing the command line arguments'
+			sys.exit(1)
 
 		# check if file exists
 		checkExistence(source, 'source image')
@@ -595,7 +604,11 @@ for x in range(0, len(sys.argv)):
 
 	if(str(sys.argv[x]) == '-sdir'):
 
-		source_dir = str(sys.argv[x+1])
+		try:
+			source_dir = str(sys.argv[x+1])
+		except(IndexError):
+			print >>sys.stderr, 'There was a problem parsing the command line arguments'
+			sys.exit(1)
 
 		# check if directory exists
 		checkExistence(source_dir, 'source directory')
@@ -611,7 +624,11 @@ for x in range(0, len(sys.argv)):
 
 	if(str(sys.argv[x]) == '-pdir'):
 		
-		pattern_dir = str(sys.argv[x+1])
+		try:
+			pattern_dir = str(sys.argv[x+1])
+		except(IndexError):
+			print >>sys.stderr, 'There was a problem parsing the command line arguments'
+			sys.exit(1)
 
 		# check if directory exists
 		checkExistence(pattern_dir, 'pattern directory')
