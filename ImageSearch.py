@@ -22,14 +22,14 @@ class ImageSearch:
 			for source in self.source_array:
 				try:
 					self.patternImage = Image.open(pattern)
-					self.patternName = pattern.split('\\')[-1]
+					self.patternName = pattern.split('/')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Pattern image not found or not of the correct image format.'
 					sys.exit(1)
 
 				try:
 					self.sourceImage = Image.open(source)
-					self.sourceName = source.split('\\')[-1]
+					self.sourceName = source.split('/')[-1]
 				except (IOError, IndexError):
 					print >>sys.stderr, 'Source image not found or not of the correct image format.'
 					sys.exit(1)
@@ -53,12 +53,6 @@ class ImageSearch:
 
 				self.sourcePixels = self.sourceImage.load()
 				self.sourceSize = self.sourceImage.size
-				
-				if self.sourceSize[0]*self.sourceSize[1] > 1000000:
-					
-					#self.sourceSize = (self.sourceSize[0]/2, self.sourceSize[1]/2)
-					self.sourceImage = self.sourceImage.resize(self.patSize, Image.ANTIALIAS)
-					self.sourcePixels = self.sourceImage.load()
 				
 				'''
 				self.sourcePixelArray = []
@@ -91,86 +85,41 @@ class ImageSearch:
 		
 		PatternOctaveOne = blur(PatternOctave)
 		
-	  #PatternOctave = PatternOctave.resize( (patternSize[0]/2, patternSize[1]/2) )
-		
-		#PatternOctaveTwo = blur(PatternOctave)
-		
-		#PatternOctave = PatternOctave.resize( (patternSize[0]/4, patternSize[1]/4) )
-		
-		#PatternOctaveThree = blur(PatternOctave)
-		
-		#PatternOctave = PatternOctave.resize( (patternSize[0]/8, patternSize[1]/8) )
-		
-		#PatternOctaveFour = blur(PatternOctave)
-		
 		####### Difference of Gaussians ########
 		
-		#PatternOctaveOne = diffGaus(PatternOctaveOne)
-		
-		# PatternOctaveTwo = diffGaus(PatternOctaveTwo)
-	
-		# PatternOctaveThree = diffGaus(PatternOctaveThree)
-		
-		#PatternOctaveFour = diffGaus(PatternOctaveFour)
-		
+		PatternOctaveOne = diffGaus(PatternOctaveOne, self.patternImage)
+
 		####### Locate Maxima/Minima ##########
 		
-		PatternKeypointsOne = filter_by_gradient(PatternOctaveOne[1:3], filter_out_low_contrast(PatternOctaveOne[1:3], maxMin(PatternOctaveOne)))
-		# plot_keypoints(self.patternImage, PatternKeypointsOne[0], "patternTest.png")
-		
-		# PatternKeypointsTwo = filter_by_gradient(PatternOctaveTwo[1:3], filter_out_low_contrast(PatternOctaveTwo[1:3], maxMin(PatternOctaveTwo)))
+		PatternKeypointsOne = self.filter_by_gradient(PatternOctaveOne[0], 
+								filter_out_low_contrast(PatternOctaveOne[0], self.maxMin(PatternOctaveOne, self.patternPixels)), self.patternPixels)
+		plot_keypoints(self.patternImage, PatternKeypointsOne, "patternTest.png")
 
-		# PatternKeypointsThree = filter_by_gradient(PatternOctaveThree[1:3], filter_out_low_contrast(PatternOctaveThree[1:3], maxMin(PatternOctaveThree)))
+		################################## SOURCE IMAGE ###################################
+		SourceOctave = self.sourceImage
 		
-		# PatternKeypointsFour = filter_by_gradient(PatternOctaveFour[1:3], filter_out_low_contrast(PatternOctaveFour[1:3], maxMin(PatternOctaveFour)))
-		
-		
-		#################################### Source IMAGE ###################################
-		
-		#SourceOctave = self.sourceImage
-		
-		#sourceSize = SourceOctave.size
+		sourceSize = SourceOctave.size
 		
 		###### Gaussian Blurs #########
 		
-		#SourceOctaveOne = blur(SourceOctave)
-		
-		# SourceOctave = SourceOctave.resize( (sourceSize[0]/2, sourceSize[1]/2) )
-		
-		# SourceOctaveTwo = blur(SourceOctave)
-		
-		# SourceOctave = SourceOctave.resize( (sourceSize[0]/4, sourceSize[1]/4) )
-		
-		# SourceOctaveThree = blur(SourceOctave)
-		
-		# SourceOctave = SourceOctave.resize( (sourceSize[0]/8, sourceSize[1]/8) )
-		
-		# SourceOctaveFour = blur(SourceOctave)
+		SourceOctaveOne = blur(SourceOctave)
 		
 		####### Difference of Gaussians ########
 		
-		#SourceOctaveOne = diffGaus(SourceOctaveOne)
-		
-		# SourceOctaveTwo = diffGaus(SourceOctaveTwo)
-	
-		# SourceOctaveThree = diffGaus(SourceOctaveThree)
-		
-		# SourceOctaveFour = diffGaus(SourceOctaveFour)
-		
+		SourceOctaveOne = diffGaus(SourceOctaveOne, self.sourceImage)
+
 		####### Locate Maxima/Minima ##########
 		
-		#SourceKeypointsOne = filter_by_gradient(SourceOctaveOne[1:3], filter_out_low_contrast(SourceOctaveOne[1:3], maxMin(SourceOctaveOne)))
-		
-		# SourceKeypointsTwo = filter_by_gradient(SourceOctaveTwo[1:3], filter_out_low_contrast(SourceOctaveTwo[1:3], maxMin(SourceOctaveTwo)))
+		SourceKeypointsOne = self.filter_by_gradient(SourceOctaveOne[0], 
+								filter_out_low_contrast(SourceOctaveOne[0], self.maxMin(SourceOctaveOne, self.sourcePixels)), self.sourcePixels)
 
-		# SourceKeypointsThree = filter_by_gradient(SourceOctaveThree[1:3], filter_out_low_contrast(SourceOctaveThree[1:3], maxMin(SourceOctaveThree)))
-		
-		# SourceKeypointsFour = filter_by_gradient(SourceOctaveFour[1:3], filter_out_low_contrast(SourceOctaveFour[1:3], maxMin(SourceOctaveFour)))
+		plot_keypoints(self.sourceImage, SourceKeypointsOne, "sourceTest.png")
+				
+		self.is_match(PatternKeypointsOne, SourceKeypointsOne)
 
-		self.is_match(PatternKeypointsOne[0])
 
-	def is_match(self, pattern_keypoints):
-		maxMisses = len(pattern_keypoints)/4
+	def is_match(self, pattern_keypoints, source_keypoints):
+		maxMisses  = len(pattern_keypoints)/4
 		maxXoffset = (self.sourceImage.size[0]-self.patternImage.size[0])+1
 		maxYoffset = (self.sourceImage.size[1]-self.patternImage.size[1])+1
 
@@ -180,12 +129,25 @@ class ImageSearch:
 					misses = 0
 					for point in pattern_keypoints:
 						if not misses > maxMisses:
-							pattern_pixel = self.patternPixels[point[0], point[1]]
-							source_pixel = self.sourcePixels[point[0]+x, point[1]+y]
+							pattern_pixel = pattern_keypoints[point]
+
+							point_str = point.split("-")
+
+							source_x = int(point_str[0])+x
+							source_y = int(point_str[1])+y
+
+							source_point = str(source_x)+"-"+str(source_y)
+
+							try:
+								source_pixel = source_keypoints[source_point]
+							except(KeyError):
+								misses += 1
+								break
+
 							if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
 								misses += 1
-					if misses <= maxMisses:
-						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1-(misses/len(pattern_keypoints))))
+					if misses < maxMisses:
+						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, round(1-((misses+0.0)/(len(pattern_keypoints)+0.0)), 2)))
 		return False
 
 	def is_match_brute_force(self):
@@ -231,14 +193,14 @@ class ImageSearch:
 		return 0
 
 	def check_if_two_pixels_are_equivelant(self, pixel1, pixel2):
-		tolerableDiff = 5				
+		tolerableDiff = 1				
 		# if both PNG, little room for error
 		# if one is JPG, tolerable error = 60
 		# if one is GIF, tolerable error = 150
 		if self.patternFormat == "JPEG" or self.sourceFormat == "JPEG":
-			tolerableDiff = 20
+			tolerableDiff = 40
 		if self.patternFormat == "GIF" or self.sourceFormat == "GIF":
-			tolerableDiff = 55
+			tolerableDiff = 95
 
 		
 		Rdiff = math.fabs(pixel1[0] - pixel2[0])
@@ -251,47 +213,106 @@ class ImageSearch:
 			return True
 		else: 
 			return False
+
+	# locates maxima and minima in Difference of Gaussian Images
+	# returns a list of lists of keypoints
+	def maxMin(self, octave, compare_pixels):
+
+		# list of tuples of x,y coordinates of keypoints
+		result = []
+
+		for x in range(1, len(octave)-1):
+		
+			keypoints = {}
+		
+			top = octave[x-1]
+			middle = octave[x]
+			bottom = octave[x+1]
+			
+			# all sizes in a octave are equal, so this variable represents 
+			# the size of each entry in the octave
+			size = top.size
+			
+			for x in range(1, size[0]-1):
+				for y in range(1, size[1]-1):
+					
+					img = middle.load()
+					
+					center = img[x,y]
+					center = center[0] + center[1] + center[2]
+					
+					neighbors = getNeighborsRGBValues(img, x, y)
+					
+					if checkMinimum(center, neighbors):
+					
+						imgTop = top.load()
+						
+						neighborsTop = getNeighborsRGBValues(imgTop, x, y)
+						
+						if checkMinimum(center, neighborsTop):
+						
+							imgBot = bottom.load()
+							
+							neighborsBot = getNeighborsRGBValues(imgBot, x, y)
+							
+							if checkMinimum(center, neighborsBot):
+							
+								keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
+					
+					if checkMaximum(center, neighbors):
+				
+						imgTop = top.load()
+						
+						neighborsTop = getNeighborsRGBValues(imgTop, x, y)
+						
+						if checkMaximum(center, neighborsTop):
+						
+							imgBot = bottom.load()
+							
+							neighborsBot = getNeighborsRGBValues(imgBot, x, y)
+							
+							if checkMaximum(center, neighborsBot):
+							
+								keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
+								
+			result.append(keypoints)
+
+		return result[0]
+
+	# filters out keypoints in octave_keypoints that do not have a gradient
+	def filter_by_gradient(self, blur, octave_keypoints, pixels):
+		new_keypoints = {}
+		for x in octave_keypoints:
+			pixel = octave_keypoints[x]
+
+			point_str = x.split("-")
+
+			xc = int(point_str[0])
+			yc = int(point_str[1])
+
+			neighbors = getNeighborsDict(pixels, xc, yc)
+			if goodGradient(pixel, neighbors):
+				new_keypoints[x] = octave_keypoints[x]
+		return new_keypoints
 ##################### Functions #########################
 
 # collects the average contrast of all pixels, and filters out the octave_keypoints
 # that are greater than the average
-def filter_out_low_contrast(octave, octave_keypoints):
-	new_keypoints = []
-	for blur in octave:
-		pixels = blur.load()
-		total_contrast = 0
-		total_pixels = 0
-		counter = 0
-		for x in range(0, blur.size[0]):
-			for y in range(0, blur.size[1]):
-				pixel = pixels[x, y]
-				total_contrast += pixel[0] + pixel[1] + pixel[2]
-				total_pixels += 1
-		avg_contrast = total_contrast/total_pixels
-		new_pixels = []
-		for x in octave_keypoints[counter]:
-			pixel = pixels[x[0], x[1]]
-			pixel_contrast = pixel[0] + pixel[1] + pixel[2]
-			if pixel_contrast < (avg_contrast*.5):
-				new_pixels.append(x)
-		new_keypoints.append(new_pixels)
-		counter += 1
-	return new_keypoints
-
-# filters out keypoints in octave_keypoints that do not have a gradient
-def filter_by_gradient(octave, octave_keypoints):
-	new_keypoints = []
-	for blur in octave:
-		pixels = blur.load()
-		counter = 0
-		new_pixels = []
-		for x in octave_keypoints[counter]:
-			pixel = pixels[x[0], x[1]]
-			neighbors = getNeighborsDict(pixels, x[0], x[1])
-			if goodGradient(pixel, neighbors):
-				new_pixels.append(x)
-		new_keypoints.append(new_pixels)
-		counter += 1
+def filter_out_low_contrast(blur, octave_keypoints):
+	pixels = blur.load()
+	total_contrast = 0
+	total_pixels = 0
+	for x in octave_keypoints:
+		pixel = octave_keypoints[x]
+		total_contrast += pixel[0] + pixel[1] + pixel[2]
+		total_pixels += 1
+	avg_contrast = total_contrast/total_pixels
+	new_keypoints = {}
+	for x in octave_keypoints:
+		pixel = octave_keypoints[x]
+		pixel_contrast = pixel[0] + pixel[1] + pixel[2]
+		if pixel_contrast < (avg_contrast*.5):
+			new_keypoints[x] = octave_keypoints[x]
 	return new_keypoints
 
 # checks a pixel against its left and right neighbors to see if a gradient exists
@@ -321,8 +342,15 @@ def goodGradient(pixel, neighbors):
 # plots the keypoints found in the pattern image onto the pattern image
 def plot_keypoints(image, keypoints, name):
 	image = Image.new(image.mode, image.size)
-	for y in keypoints:
-		image.putpixel(y, (0, 255, 0))
+	for x in keypoints:
+		pixel = keypoints[x]
+
+		point_str = x.split("-")
+
+		xc = int(point_str[0])
+		yc = int(point_str[1])
+
+		image.putpixel((xc, yc), (0, 255, 0))
 	image.save(name)
 
 # creates 5 blur layers over an octave of an image
@@ -342,89 +370,19 @@ def blur(image):
 
 
 # creates the difference of gaussian for an octave of an image
-def diffGaus(octave):
-
-	save = octave[0]
+def diffGaus(octave, original):
 	
 	differences = []
 	
-	for i in range(1, len(octave)):
+	for i in range(0, len(octave)):
 	
 		curr = octave[i]
 		
-		diff = ImageChops.difference(save, curr)
+		diff = ImageChops.difference(original, curr)
 		
 		differences.append(diff)
 		
-		save = curr
-		
 	return differences
-		
-# locates maxima and minima in Difference of Gaussian Images
-# returns a list of lists of keypoints
-def maxMin(octave):
-
-	# list of tuples of x,y coordinates of keypoints
-	result = []
-
-	for x in range(1, len(octave)-1):
-	
-		keypoints = []
-	
-		top = octave[x-1]
-		middle = octave[x]
-		bottom = octave[x+1]
-		
-		# all sizes in a octave are equal, so this variable represents 
-		# the size of each entry in the octave
-		size = top.size
-		
-		for x in range(1, size[0]-1):
-			for y in range(1, size[1]-1):
-				
-				img = middle.load()
-				
-				center = img[x,y]
-				center = center[0] + center[1] + center[2]
-				
-				neighbors = getNeighborsRGBValues(img, x, y)
-				
-				if checkMinimum(center, neighbors):
-				
-					imgTop = top.load()
-					
-					neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-					
-					if checkMinimum(center, neighborsTop):
-					
-						imgBot = bottom.load()
-						
-						neighborsBot = getNeighborsRGBValues(imgBot, x, y)
-						
-						if checkMinimum(center, neighborsBot):
-						
-							keypoints.append((x,y))
-				
-				if checkMaximum(center, neighbors):
-			
-					imgTop = top.load()
-					
-					neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-					
-					if checkMaximum(center, neighborsTop):
-					
-						imgBot = bottom.load()
-						
-						neighborsBot = getNeighborsRGBValues(imgBot, x, y)
-						
-						if checkMaximum(center, neighborsBot):
-						
-							keypoints.append((x,y))
-							
-		result.append(keypoints)
-							
-
-	return result
 	
 # gets the sum of the RGB values of the neighbors of a center pixel[x,y]
 # returns values in an dictionary
