@@ -60,7 +60,7 @@ class ImageSearch:
 						self.sourcePixelArray.append((self.sourcePixels[x,y], x, y))
 	
 				if (self.patSize[0]*self.patSize[1]) > 300:
-					self.sift()
+					self.key_point_match()
 				else:
 					self.SAD()
 
@@ -68,7 +68,7 @@ class ImageSearch:
 		for x in self.matches:
 			# print the match in the spec's format
 			# removed confidence level printing ---->  + " with confidence " + str(x[5]) + "%"
-			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])+ " (with "+ str(x[5]*100) + "% confidence)"
+			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])+ " (with "+ str(x[5]) + "% confidence)"
 
   #########################################################
   ### SAD ALGORITHM, ONLY USE ON SMALL IMAGES VERY SLOW ###
@@ -99,101 +99,105 @@ class ImageSearch:
   #########################
   ### END SAD ALGORITHM ###
   #########################
+# try to match these two images based on important pixels
+	def key_point_match(self):
 
-	# try to match images using the SIFT algorithm
-	def sift(self):
-	
-		################################## PATTERN IMAGE ###################################
+		patternPixels = imageSearch.patternImage.load()
+		patSize = imageSearch.patternImage.size
 
-		# the current image, initilized to the patternImage
-		PatternOctave = self.patternImage
-		
-		patternSize = PatternOctave.size
-		
-		###### Gaussian Blurs #########
-		
-		PatternOctave = blur(PatternOctave)
-		
-		####### Difference of Gaussians ########
-		
-		PatternOctave = diffGaus(PatternOctave, self.patternImage)
+		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
 
-		####### Locate Maxima/Minima ##########
-		
-		PatternKeypoints = self.maxMin(PatternOctave, self.patternPixels)
+		# adds the "RGB" pixel data to the list
+		for x in range(0,patSize[0]):
+			for y in range(0, patSize[1]):
+				patPixelArray.append((patternPixels[x,y], x, y))
 
-		if len(PatternKeypoints) > 100:
-			PatternKeypoints = filter_out_low_contrast(PatternOctave[0], PatternKeypoints, self.patPixelArray)
+		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
 
-		if len(PatternKeypoints) > 50:
-			PatternKeypoints = filter_by_gradient(PatternOctave[0], PatternKeypoints, self.patternPixels)
 
-		plot_keypoints(self.patternImage, PatternKeypoints, "patternTest.png")
+		uniques = imageSearch.find_unique_pixels(patPixelArray) # list of the unique pixels in the pattern image
 
-		################################## SOURCE IMAGE ###################################
-		SourceOctave = self.sourceImage
-		
-		sourceSize = SourceOctave.size
-		
-		###### Gaussian Blurs #########
-		
-		SourceOctave = blur(SourceOctave)
-		
-		####### Difference of Gaussians ########
-		
-		SourceOctave = diffGaus(SourceOctave, self.sourceImage)
+		patternPixels = self.patternImage.load()	# holds the pattern pixel information
+		sourcePixels = self.sourceImage.load()		# holds the source pixel information 
 
-		####### Locate Maxima/Minima ##########
-		
-		SourceKeypoints = self.maxMin(SourceOctave, self.sourcePixels)
+		sourceWidth = self.sourceImage.size[0]		# width of the source image
+		sourceHeight = self.sourceImage.size[1]	# height of the source image
 
-		SourceKeypoints = filter_out_low_contrast(SourceOctave[0], SourceKeypoints, self.sourcePixelArray)
+		sourcePixelArray = []						# a list to hold the "RGB" pixel data for the source image
 
-		SourceKeypoints = filter_by_gradient(SourceOctave[0], SourceKeypoints, self.sourcePixels)
+		# adds the "RGB" pixel data to the list
+		for x in range(0,sourceWidth):
+			for y in range(0, sourceHeight):
+				sourcePixelArray.append((sourcePixels[x,y], x, y))
 
-		plot_keypoints(self.sourceImage, SourceKeypoints, "sourceTest.png")
+		foundIndex = -1
+
+		# checks to see any unique pixels are in the source image
+		for x in range(0, len(uniques)):
+			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
+				foundIndex = x
+				break
+
+		if foundIndex != -1:
+			# if a unique pixel is in the source image, finds the pixel in the source 
+			# and calculates the percentage of the match. If the percentage is above 50%, 
+			# prints out the match message
+			source_coordinates = self.find_pixels_in_source(uniques[foundIndex], sourcePixelArray)
+			for i in range(0, len(source_coordinates)):
+				patternXC = uniques[foundIndex][1]
+				patternYC = uniques[foundIndex][2]
+
+				sourceXC = source_coordinates[i][0]
+				sourceYC = source_coordinates[i][1]
+
+				xOffset = sourceXC - patternXC
+				yOffset = sourceYC - patternYC
+				if xOffset >= 0 and yOffset >= 0:
+					self.current_confidence = 0;
+					percentage = self.percentage_of_unique_matches(uniques, xOffset, yOffset)
 				
-		self.is_match(PatternKeypoints, SourceKeypoints)
+					if(percentage >= .3):
+						
+						# this also sets the confidence level self.current_confidence
+						isMatch = self.check_exact_match(xOffset, yOffset)				
 
-	def is_match(self, pattern_keypoints, source_keypoints):
-		maxMisses  = len(pattern_keypoints)/4
-		maxXoffset = (self.sourceImage.size[0]-self.patternImage.size[0])+1
-		maxYoffset = (self.sourceImage.size[1]-self.patternImage.size[1])+1
+						if isMatch == True:
 
-		if len(pattern_keypoints) > 0:
-			for x in range(0, maxXoffset):
-				for y in range(0, maxYoffset):
-					misses = 0
-					for point in pattern_keypoints:
-						if not misses > maxMisses:
-							missed = False
-							pattern_pixel = pattern_keypoints[point]
+							# inverse the confidence to get the real value, then change to percent, trim decimals
+							self.current_confidence = 1 - self.current_confidence
+							self.current_confidence = self.current_confidence * 100
+							confd = int(self.current_confidence)
 
-							point_str = point.split("-")
+							# decide whether to add the match to the total array of matches, replace a match, or do not add
+							self.new_or_better_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
 
-							source_x = int(point_str[0])+x
-							source_y = int(point_str[1])+y
+	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
+	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
+	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
+	# be returned and compared
+	def find_unique_pixels(self, patPixelArray):
+		uniques = []				# holds the found unique values in the pattern image	
+		
+		length = len(patPixelArray)
+		seperator = length/100						# a value to control what pixels are considered "unique"
 
-							source_point = str(source_x)+"-"+str(source_y)
+		if(length > 101):
+			for x in range(0, 50):
+				uniques.append(patPixelArray[x])
 
-							try:
-								source_pixel = source_keypoints[source_point]
-							except(KeyError):
-								missed = True
+			for x in range((length-51), length-1):
+				uniques.append(patPixelArray[x])
+		else:
+			for x in patPixelArray:
+				uniques.append(x)		
 
-							if not missed:
-								if not self.check_if_two_pixels_are_equivelant(pattern_pixel, source_pixel):
-									misses += 1
-							else:
-								misses += 1
-					if misses < maxMisses:
-						self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, round(1-((misses+0.0)/(len(pattern_keypoints)+0.0)), 2)))
-		return False
+		return uniques
 
+	# checks if this is a duplicate match/over-lapping match
 	def new_or_better_match(self, image_info):
 		for i in range(0, len(self.matches)):
 			# if the pattern and source names are the same we should check if the
-			# matched area are over lapping too much (50 percent)
+			# if the matched area are over lapping too much (50 percent)
 			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
 				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
 				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
@@ -206,23 +210,80 @@ class ImageSearch:
 					if not self.matches[i][5] > image_info[5]:
 						self.matches[i] = image_info
 						return 0
-					else:
-						return 0
 				else:
 					self.matches.append(image_info)
 					return 0
 		self.matches.append(image_info)
 		return 0
 
+	# determines if the pixel is in the picture
+	def is_pixel_in_source(self, pixel, array):
+		for x in range(0, len(array)):
+			if self.check_if_two_pixels_are_equivelant(array[x][0][0:3], pixel[0][0:3]):
+				return True
+		return False
+
+	# returns the coordinates to the pixel in the picture
+	def find_pixels_in_source(self, pixel, array):
+		matches = []
+		for x in range(0, len(array)):
+			if self.check_if_two_pixels_are_equivelant(array[x][0][0:3], pixel[0][0:3]):
+				matches.append((array[x][1], array[x][2]))
+		return matches
+
+	# returns the percentage of pixel to pixel matches in the unique pixel array and the source picture
+	def percentage_of_unique_matches(self, uniques, xOffset, yOffset):
+		matches = 0.00								# initial value for the match percentage
+		sourcePixels = self.sourceImage.load()	
+		sourceSize = self.sourceImage.size		
+
+		for x in range(0, len(uniques), 10):
+			patternXC = uniques[x][1]+xOffset
+			patternYC = uniques[x][2]+yOffset
+
+			if(patternXC >= 0 and patternYC >= 0 and patternXC <= (sourceSize[0]-1) and patternYC <= (sourceSize[1]-1)):
+				source_pixel = sourcePixels[patternXC, patternYC]
+
+				if self.check_if_two_pixels_are_equivelant(source_pixel[0:3], uniques[x][0][0:3]):
+					matches += 1.00
+
+		return matches/((len(uniques)/10.0)+0.00)
+
+	# checks if the current pattern and source image exactly match in the
+	# partial match area. This also sets the confidence level of the match
+	def check_exact_match(self, xOffset, yOffset):
+		sourcePixels = self.sourceImage.load()
+		patternPixels = self.patternImage.load()
+		patternWidth = self.patternImage.size[0]
+		patternHeigth = self.patternImage.size[1]
+		sourceWidth = self.sourceImage.size[0]
+		sourceHeight = self.sourceImage.size[1]
+
+		counter = 0
+		for y in range(0, patternHeigth):
+			for x in range(0, patternWidth):
+				if x + xOffset < sourceWidth and y + yOffset < sourceHeight:
+					patPixel = patternPixels[x, y]
+					sourcePixel = sourcePixels[x + xOffset, y + yOffset]
+					
+					counter += 1
+					if self.check_if_two_pixels_are_equivelant(patPixel, sourcePixel) == False:
+						return False
+				else:
+					return False
+		self.current_confidence = self.current_confidence/counter
+		return True
+
+	# checks pixel equivalency rather than equality, since changing image format will alter pixels
 	def check_if_two_pixels_are_equivelant(self, pixel1, pixel2):
-		tolerableDiff = 1				
+		tolerableDiff = 5				
 		# if both PNG, little room for error
 		# if one is JPG, tolerable error = 60
 		# if one is GIF, tolerable error = 150
 		if self.patternFormat == "JPEG" or self.sourceFormat == "JPEG":
-			tolerableDiff = 40
+			tolerableDiff = 60
 		if self.patternFormat == "GIF" or self.sourceFormat == "GIF":
-			tolerableDiff = 95
+			tolerableDiff = 150
 
 		
 		Rdiff = math.fabs(pixel1[0] - pixel2[0])
@@ -235,296 +296,6 @@ class ImageSearch:
 			return True
 		else: 
 			return False
-
-	# locates maxima and minima in Difference of Gaussian Images
-	# returns a list of lists of keypoints
-	def maxMin(self, octave, compare_pixels):
-
-		# list of tuples of x,y coordinates of keypoints
-		result = []
-
-		for x in range(1, len(octave)-1):
-		
-			keypoints = {}
-		
-			top = octave[x-1]
-			middle = octave[x]
-			bottom = octave[x+1]
-			
-			# all sizes in a octave are equal, so this variable represents 
-			# the size of each entry in the octave
-			size = top.size
-			
-			for x in range(1, size[0]-1):
-				for y in range(1, size[1]-1):
-					
-					img = middle.load()
-					
-					center = img[x,y]
-					center = center[0] + center[1] + center[2]
-					if center != 0:
-						neighbors = getNeighborsRGBValues(img, x, y)
-						
-						if checkMinimum(center, neighbors):
-						
-							imgTop = top.load()
-							
-							neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-							
-							if checkMinimum(center, neighborsTop):
-							
-								imgBot = bottom.load()
-								
-								neighborsBot = getNeighborsRGBValues(imgBot, x, y)
-								
-								if checkMinimum(center, neighborsBot):
-								
-									keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
-						
-						if checkMaximum(center, neighbors):
-					
-							imgTop = top.load()
-							
-							neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-							
-							if checkMaximum(center, neighborsTop):
-							
-								imgBot = bottom.load()
-								
-								neighborsBot = getNeighborsRGBValues(imgBot, x, y)
-								
-								if checkMaximum(center, neighborsBot):
-								
-									keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
-								
-			result.append(keypoints)
-
-		return result[0]
-
-##################### Functions #########################
-
-# filters out keypoints in octave_keypoints that do not have a gradient
-def filter_by_gradient(blur, octave_keypoints, pixels):
-	new_keypoints = {}
-	for x in octave_keypoints:
-		pixel = octave_keypoints[x]
-
-		point_str = x.split("-")
-
-		xc = int(point_str[0])
-		yc = int(point_str[1])
-
-		neighbors = getNeighborsDict(pixels, xc, yc)
-		if goodGradient(pixel, neighbors):
-			new_keypoints[x] = octave_keypoints[x]
-
-	if len(new_keypoints) > 1:
-		return new_keypoints
-	else:
-		return octave_keypoints
-
-# collects the average contrast of all pixels, and filters out the octave_keypoints
-# that are greater than the average
-def filter_out_low_contrast(blur, octave_keypoints, pixels):
-	total_contrast = 0
-	total_pixels = 0
-	for x in pixels:
-		total_contrast += x[0][0] + x[0][1] + x[0][2]
-		total_pixels += 1
-	avg_contrast = total_contrast/total_pixels
-	new_keypoints = {}
-	for x in octave_keypoints:
-		pixel = octave_keypoints[x]
-		pixel_contrast = pixel[0] + pixel[1] + pixel[2]
-		if pixel_contrast < (avg_contrast):
-			new_keypoints[x] = octave_keypoints[x]
-
-	if len(new_keypoints) > 1:
-		return new_keypoints
-	else:
-		return octave_keypoints
-
-# checks a pixel against its left and right neighbors to see if a gradient exists
-def goodGradient(pixel, neighbors):
-	pixel_value = pixel[0]+pixel[1]+pixel[2]
-
-	left = []
-	left.append(neighbors["topLeft"])
-	left.append(neighbors["midLeft"])
-	left.append(neighbors["botLeft"])
-	left.append(neighbors["botMid"])
-
-	right = []
-	right.append(neighbors["topRight"])
-	right.append(neighbors["midRight"])
-	right.append(neighbors["botRight"])
-	right.append(neighbors["topMid"])
-
-	if checkMinimum(pixel_value, right) and checkMaximum(pixel_value, left):
-		return True
-	
-	elif checkMinimum(pixel_value, left) and checkMaximum(pixel_value, right):
-		return True
-		
-	return False
-	
-# plots the keypoints found in the pattern image onto the pattern image
-def plot_keypoints(image, keypoints, name):
-	image = Image.new(image.mode, image.size)
-	for x in keypoints:
-		pixel = keypoints[x]
-
-		point_str = x.split("-")
-
-		xc = int(point_str[0])
-		yc = int(point_str[1])
-
-		image.putpixel((xc, yc), (0, 255, 0))
-	image.save(name)
-
-# creates 5 blur layers over an octave of an image
-def blur(image):
-	
-	blurImages = []
-	
-	for i in range(0,5):
-		
-		blur = image.filter(ImageFilter.BLUR)
-		blur = image.filter(ImageFilter.BLUR)
-		
-		blurImages.append(blur)	
-		
-		image = blur
-
-	return blurImages
-
-
-# creates the difference of gaussian for an octave of an image
-def diffGaus(octave, original):
-	
-	differences = []
-	
-	for i in range(0, len(octave)):
-	
-		curr = octave[i]
-		
-		diff = ImageChops.difference(original, curr)
-
-		differences.append(diff)
-		
-	return differences
-	
-# gets the sum of the RGB values of the neighbors of a center pixel[x,y]
-# returns values in an dictionary
-def getNeighborsDict(data, x, y):
-	
-	neighbors = {}
-	
-	try:
-	
-		topLeft = data[x-1,y-1]
-		topLeft = topLeft[0] + topLeft[1] + topLeft[2]
-		neighbors["topLeft"] = topLeft
-		
-		topMid = data[x,y-1]
-		topMid = topMid[0] + topMid[1] + topMid[2]
-		neighbors["topMid"] = topMid
-		
-		topRight = data[x+1,y-1]
-		topRight = topRight[0] + topRight[1] + topRight[2]
-		neighbors["topRight"] = topRight
-		
-		midLeft = data[x-1,y]
-		midLeft = midLeft[0] + midLeft[1] + midLeft[2]
-		neighbors["midLeft"] = midLeft
-		
-		midRight = data[x+1,y]
-		midRight = midRight[0] + midRight[1] + midRight[2]
-		neighbors["midRight"] = midRight
-		
-		botLeft = data[x-1,y+1]
-		botLeft = botLeft[0] + botLeft[1] + botLeft[2]
-		neighbors["botLeft"] = botLeft
-		
-		botMid = data[x,y+1]
-		botMid = botMid[0] + botMid[1] + botMid[2]
-		neighbors["botMid"] = botMid
-		
-		botRight = data[x+1,y+1]
-		botRight = botRight[0] + botRight[1] + botRight[2]
-		neighbors["botRight"] = botRight
-			
-		return neighbors
-		
-	except(IndexError):
-		
-		print "x and y values provided are on the edge; Not enough neighbors."
-
-
-# gets the sum of the RGB values of the neighbors of a center pixel[x,y]
-# returns values in an array
-def getNeighborsRGBValues(data, x, y):
-	
-	neighbors = []
-	
-	try:
-	
-		topLeft = data[x-1,y-1]
-		topLeft = topLeft[0] + topLeft[1] + topLeft[2]
-		neighbors.append(topLeft)
-		
-		topMid = data[x,y-1]
-		topMid = topMid[0] + topMid[1] + topMid[2]
-		neighbors.append(topMid)
-		
-		topRight = data[x+1,y-1]
-		topRight = topRight[0] + topRight[1] + topRight[2]
-		neighbors.append(topRight)
-		
-		midLeft = data[x-1,y]
-		midLeft = midLeft[0] + midLeft[1] + midLeft[2]
-		neighbors.append(midLeft)
-		
-		midRight = data[x+1,y]
-		midRight = midRight[0] + midRight[1] + midRight[2]
-		neighbors.append(midRight)
-		
-		botLeft = data[x-1,y+1]
-		botLeft = botLeft[0] + botLeft[1] + botLeft[2]
-		neighbors.append(botLeft)
-		
-		botMid = data[x,y+1]
-		botMid = botMid[0] + botMid[1] + botMid[2]
-		neighbors.append(topMid)
-		
-		botRight = data[x+1,y+1]
-		botRight = botRight[0] + botRight[1] + botRight[2]
-		neighbors.append(topRight)
-			
-		return neighbors
-		
-	except(IndexError):
-		
-		print "x and y values provided are on the edge; Not enough neighbors."
-		
-# checks neighboring cells to see if the center pixel in a matrix is the minimum
-def checkMinimum(center, neighbors):
-	for i in neighbors:
-	
-		if i < center:
-			return False
-	
-	return True
-	
-# checks neighboring cells to see if the center pixel in a matrix is the maximum
-def checkMaximum(center, neighbors):
-
-	for i in neighbors:
-	
-		if i > center:
-			return False
-			
-	return True
 
 ######### Input Checks ###############
 
