@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from PIL import Image, ImageFilter, ImageChops
+import Image, ImageFilter, ImageChops
 import sys
 import os
 import math
@@ -147,14 +147,13 @@ class ImageSearch:
 		
 		SourceKeypoints = self.maxMin(SourceOctave, self.sourcePixels)
 
-		# SourceKeypoints = filter_out_low_contrast(SourceOctave[0], SourceKeypoints, self.sourcePixelArray)
+		SourceKeypoints = filter_out_low_contrast(SourceOctave[0], SourceKeypoints, self.sourcePixelArray)
 
-		#SourceKeypoints = filter_by_gradient(SourceOctave[0], SourceKeypoints, self.sourcePixels)
+		SourceKeypoints = filter_by_gradient(SourceOctave[0], SourceKeypoints, self.sourcePixels)
 
 		plot_keypoints(self.sourceImage, SourceKeypoints, "sourceTest.png")
 				
 		self.is_match(PatternKeypoints, SourceKeypoints)
-
 
 	def is_match(self, pattern_keypoints, source_keypoints):
 		maxMisses  = len(pattern_keypoints)/4
@@ -263,40 +262,40 @@ class ImageSearch:
 					
 					center = img[x,y]
 					center = center[0] + center[1] + center[2]
+					if center != 0:
+						neighbors = getNeighborsRGBValues(img, x, y)
+						
+						if checkMinimum(center, neighbors):
+						
+							imgTop = top.load()
+							
+							neighborsTop = getNeighborsRGBValues(imgTop, x, y)
+							
+							if checkMinimum(center, neighborsTop):
+							
+								imgBot = bottom.load()
+								
+								neighborsBot = getNeighborsRGBValues(imgBot, x, y)
+								
+								if checkMinimum(center, neighborsBot):
+								
+									keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
+						
+						if checkMaximum(center, neighbors):
 					
-					neighbors = getNeighborsRGBValues(img, x, y)
-					
-					if checkMinimum(center, neighbors):
-					
-						imgTop = top.load()
-						
-						neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-						
-						if checkMinimum(center, neighborsTop):
-						
-							imgBot = bottom.load()
+							imgTop = top.load()
 							
-							neighborsBot = getNeighborsRGBValues(imgBot, x, y)
+							neighborsTop = getNeighborsRGBValues(imgTop, x, y)
 							
-							if checkMinimum(center, neighborsBot):
+							if checkMaximum(center, neighborsTop):
 							
-								keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
-					
-					if checkMaximum(center, neighbors):
-				
-						imgTop = top.load()
-						
-						neighborsTop = getNeighborsRGBValues(imgTop, x, y)
-						
-						if checkMaximum(center, neighborsTop):
-						
-							imgBot = bottom.load()
-							
-							neighborsBot = getNeighborsRGBValues(imgBot, x, y)
-							
-							if checkMaximum(center, neighborsBot):
-							
-								keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
+								imgBot = bottom.load()
+								
+								neighborsBot = getNeighborsRGBValues(imgBot, x, y)
+								
+								if checkMaximum(center, neighborsBot):
+								
+									keypoints[str(x)+"-"+str(y)] = compare_pixels[x,y]
 								
 			result.append(keypoints)
 
@@ -391,7 +390,8 @@ def blur(image):
 	for i in range(0,5):
 		
 		blur = image.filter(ImageFilter.BLUR)
-			
+		blur = image.filter(ImageFilter.BLUR)
+		
 		blurImages.append(blur)	
 		
 		image = blur
@@ -409,7 +409,7 @@ def diffGaus(octave, original):
 		curr = octave[i]
 		
 		diff = ImageChops.difference(original, curr)
-		
+
 		differences.append(diff)
 		
 	return differences
@@ -509,7 +509,6 @@ def getNeighborsRGBValues(data, x, y):
 		
 # checks neighboring cells to see if the center pixel in a matrix is the minimum
 def checkMinimum(center, neighbors):
-
 	for i in neighbors:
 	
 		if i < center:
