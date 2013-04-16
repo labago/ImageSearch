@@ -84,7 +84,7 @@ class ImageSearch:
 					if y+self.patSize[1] <= self.sourceSize[1]:
 						diff = self.get_SAD_diff(x, y)
 						if diff == 0:
-							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 1))
+							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 100))
 
 	def get_SAD_diff(self, xoffset, yoffset):
 		total_diff = 0
@@ -158,7 +158,7 @@ class ImageSearch:
 					self.current_confidence = 0;
 					percentage = self.percentage_of_unique_matches(uniques, xOffset, yOffset)
 				
-					if(percentage >= .3):
+					if(percentage >= .5):
 						
 						# this also sets the confidence level self.current_confidence
 						confidence = self.check_exact_match(xOffset, yOffset)				
@@ -212,11 +212,14 @@ class ImageSearch:
 						if not self.matches[i][5] > image_info[5]:
 							self.matches[i] = image_info
 							return 0
+						else:
+							return 0
 					else:
 						self.matches.append(image_info)
 						return 0
 				else:
 					self.matches.append(image_info)
+					return 0
 		else:
 			self.matches.append(image_info)
 			return 0
@@ -287,9 +290,9 @@ class ImageSearch:
 		# if one is JPG, tolerable error = 60
 		# if one is GIF, tolerable error = 150
 		if self.patternFormat == "JPEG" or self.sourceFormat == "JPEG":
-			tolerableDiff = 60
+			tolerableDiff = 30
 		if self.patternFormat == "GIF" or self.sourceFormat == "GIF":
-			tolerableDiff = 150
+			tolerableDiff = 75
 
 		
 		Rdiff = math.fabs(pixel1[0] - pixel2[0])
