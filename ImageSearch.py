@@ -138,7 +138,7 @@ class ImageSearch:
 						# this also sets the confidence level self.current_confidence
 						confidence = self.check_exact_match(xOffset, yOffset)				
 
-						if confidence > .5:
+						if confidence > .7:
 
 							# inverse the confidence to get the real value, then change to percent, trim decimals
 							self.current_confidence = 100 * confidence
@@ -177,8 +177,8 @@ class ImageSearch:
 				if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
 					xOffsetDiff = abs(self.matches[i][3] - image_info[3])
 					yOffsetDiff = abs(self.matches[i][4] - image_info[4])
-					xC = self.matches[i][2][0] - xOffsetDiff
-					yC = self.matches[i][2][1] - yOffsetDiff
+					xC = abs(self.matches[i][2][0] - xOffsetDiff)
+					yC = abs(self.matches[i][2][1] - yOffsetDiff)
 					overlap_area = (xC*yC)
 					image_area = (self.matches[i][2][0]*self.matches[i][2][1])
 					percentage_overlap = (overlap_area+0.0)/(image_area+0.0)
