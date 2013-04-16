@@ -103,40 +103,15 @@ class ImageSearch:
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
+		self.patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
 
-		patternPixels = imageSearch.patternImage.load()
-		patSize = imageSearch.patternImage.size
-
-		patPixelArray = []			# holds the "RGB" pixel data for the pattern image
-
-		# adds the "RGB" pixel data to the list
-		for x in range(0,patSize[0]):
-			for y in range(0, patSize[1]):
-				patPixelArray.append((patternPixels[x,y], x, y))
-
-		patPixelArray.sort(key=lambda x: x[0])		# sorts the list of pattern "RGB" pixel data
-
-
-		uniques = imageSearch.find_unique_pixels(patPixelArray) # list of the unique pixels in the pattern image
-
-		patternPixels = self.patternImage.load()	# holds the pattern pixel information
-		sourcePixels = self.sourceImage.load()		# holds the source pixel information 
-
-		sourceWidth = self.sourceImage.size[0]		# width of the source image
-		sourceHeight = self.sourceImage.size[1]	# height of the source image
-
-		sourcePixelArray = []						# a list to hold the "RGB" pixel data for the source image
-
-		# adds the "RGB" pixel data to the list
-		for x in range(0,sourceWidth):
-			for y in range(0, sourceHeight):
-				sourcePixelArray.append((sourcePixels[x,y], x, y))
+		uniques = imageSearch.find_unique_pixels(self.patPixelArray) # list of the unique pixels in the pattern image
 
 		foundIndex = -1
 
 		# checks to see any unique pixels are in the source image
 		for x in range(0, len(uniques)):
-			if self.is_pixel_in_source(uniques[x], sourcePixelArray):
+			if self.is_pixel_in_source(uniques[x], self.sourcePixelArray):
 				foundIndex = x
 				break
 
@@ -144,7 +119,7 @@ class ImageSearch:
 			# if a unique pixel is in the source image, finds the pixel in the source 
 			# and calculates the percentage of the match. If the percentage is above 50%, 
 			# prints out the match message
-			source_coordinates = self.find_pixels_in_source(uniques[foundIndex], sourcePixelArray)
+			source_coordinates = self.find_pixels_in_source(uniques[foundIndex], self.sourcePixelArray)
 			for i in range(0, len(source_coordinates)):
 				patternXC = uniques[foundIndex][1]
 				patternYC = uniques[foundIndex][2]
@@ -170,7 +145,7 @@ class ImageSearch:
 							confd = int(self.current_confidence)
 
 							# decide whether to add the match to the total array of matches, replace a match, or do not add
-							self.new_or_better_match((self.patternName, self.sourceName, patSize, xOffset, yOffset, confd))
+							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, xOffset, yOffset, confd))
 
 	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
@@ -178,8 +153,6 @@ class ImageSearch:
 	# be returned and compared
 	def find_unique_pixels(self, pattern):
 		uniques = []
-
-		self.patPixelArray.sort(key=lambda x: x[0])
 
 		length = len(self.patPixelArray)
 
@@ -243,15 +216,13 @@ class ImageSearch:
 	# returns the percentage of pixel to pixel matches in the unique pixel array and the source picture
 	def percentage_of_unique_matches(self, uniques, xOffset, yOffset):
 		matches = 0.00								# initial value for the match percentage
-		sourcePixels = self.sourceImage.load()	
-		sourceSize = self.sourceImage.size		
 
 		for x in range(0, len(uniques), 10):
 			patternXC = uniques[x][1]+xOffset
 			patternYC = uniques[x][2]+yOffset
 
-			if(patternXC >= 0 and patternYC >= 0 and patternXC <= (sourceSize[0]-1) and patternYC <= (sourceSize[1]-1)):
-				source_pixel = sourcePixels[patternXC, patternYC]
+			if(patternXC >= 0 and patternYC >= 0 and patternXC <= (self.sourceSize[0]-1) and patternYC <= (self.sourceSize[1]-1)):
+				source_pixel = self.sourcePixels[patternXC, patternYC]
 
 				if self.check_if_two_pixels_are_equivelant(source_pixel[0:3], uniques[x][0][0:3]):
 					matches += 1.00
@@ -261,21 +232,14 @@ class ImageSearch:
 	# checks if the current pattern and source image exactly match in the
 	# partial match area. This also sets the confidence level of the match
 	def check_exact_match(self, xOffset, yOffset):
-		sourcePixels = self.sourceImage.load()
-		patternPixels = self.patternImage.load()
-		patternWidth = self.patternImage.size[0]
-		patternHeigth = self.patternImage.size[1]
-		sourceWidth = self.sourceImage.size[0]
-		sourceHeight = self.sourceImage.size[1]
-
 		total_pixels = len(self.patPixelArray)
 
 		matched = 0
-		for y in range(0, patternHeigth):
-			for x in range(0, patternWidth):
-				if x + xOffset < sourceWidth and y + yOffset < sourceHeight:
-					patPixel = patternPixels[x, y]
-					sourcePixel = sourcePixels[x + xOffset, y + yOffset]
+		for y in range(0, self.patSize[1]):
+			for x in range(0, self.patSize[0]):
+				if x + xOffset < self.sourceSize[0] and y + yOffset < self.sourceSize[1]:
+					patPixel = self.patternPixels[x, y]
+					sourcePixel = self.sourcePixels[x + xOffset, y + yOffset]
 					
 					if self.check_if_two_pixels_are_equivelant(patPixel, sourcePixel) == True:
 						matched += 1
