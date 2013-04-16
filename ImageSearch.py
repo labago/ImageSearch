@@ -176,21 +176,22 @@ class ImageSearch:
 	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
 	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
 	# be returned and compared
-	def find_unique_pixels(self, patPixelArray):
-		uniques = []				# holds the found unique values in the pattern image	
-		
-		length = len(patPixelArray)
-		seperator = length/100						# a value to control what pixels are considered "unique"
+	def find_unique_pixels(self, pattern):
+		uniques = []
 
-		if(length > 101):
-			for x in range(0, 50):
-				uniques.append(patPixelArray[x])
+		self.patPixelArray.sort(key=lambda x: x[0])
 
-			for x in range((length-51), length-1):
-				uniques.append(patPixelArray[x])
+		length = len(self.patPixelArray)
+
+		if(length > 201):
+			for x in range(0, 100):
+				uniques.append(self.patPixelArray[x])
+
+			for x in range((length-101), length-1):
+				uniques.append(self.patPixelArray[x])
 		else:
-			for x in patPixelArray:
-				uniques.append(x)		
+			for x in range(0, length-1):
+				uniques.append(self.patPixelArray[x])
 
 		return uniques
 
