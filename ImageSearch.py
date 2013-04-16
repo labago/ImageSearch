@@ -70,9 +70,9 @@ class ImageSearch:
 			# removed confidence level printing ---->  + " with confidence " + str(x[5]) + "%"
 			print x[0] + " matches " + x[1] + " at "+ str(x[2][0]) + "x" + str(x[2][1]) + "+" + str(x[3]) + "+" + str(x[4])+ " (with "+ str(x[5]) + "% confidence)"
 
-  #########################################################
-  ### SAD ALGORITHM, ONLY USE ON SMALL IMAGES VERY SLOW ###
-  #########################################################
+	#########################################################
+	### SAD ALGORITHM, ONLY USE ON SMALL IMAGES VERY SLOW ###
+	#########################################################
 
 	def SAD(self):
 		xOffset = 0
@@ -97,9 +97,9 @@ class ImageSearch:
 
 		return total_diff
 
-  #########################
-  ### END SAD ALGORITHM ###
-  #########################
+	#########################
+	### END SAD ALGORITHM ###
+	#########################
 
 	# try to match these two images based on important pixels
 	def key_point_match(self):
@@ -147,8 +147,8 @@ class ImageSearch:
 							# decide whether to add the match to the total array of matches, replace a match, or do not add
 							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, xOffset, yOffset, confd))
 
-	# first sorts the list of pattern pixels by pixel, meaning the pixel with least RGB value will
-	# be first and the one with the largest will be last. It then takes the 100 least value RGB pixels and 
+	# Takes a sorted list of pattern pixels to begin with
+	# It then takes the 100 least value RGB pixels and 
 	# 100 of the largest ones. If the pattern picture has less than 200 pixels total, the whole picture will 
 	# be returned and compared
 	def find_unique_pixels(self, pattern):
@@ -278,7 +278,7 @@ class ImageSearch:
 def checkFormat(fileLoc, imgtype):
 	try:
 		frm = Image.open(fileLoc).format
-	except (IndexError):
+	except (IndexError, IOError):
 		print >>sys.stderr, 'Corrupted Image/File Found'
 		sys.exit(1)
 		
@@ -290,7 +290,11 @@ def checkFormat(fileLoc, imgtype):
 # Arguments: fileLoc is the file location and direc is the type of directory: pattern or source
 def checkSubDir(fileLoc, direc, p):
 
-	path = p.split(fileLoc)[0] + '/'   # gets the path that leads to 'fileLoc'
+	try:
+		path = p.split(fileLoc)[0] + '/'   # gets the path that leads to 'fileLoc'
+	except (IndexError):
+		print >>sys.stderr, 'Problem with directory path'
+		sys.exit(1)
 
 	if os.path.isdir(os.path.join(path, fileLoc)):
 		print >>sys.stderr, 'Subdirectory found in ' + direc
