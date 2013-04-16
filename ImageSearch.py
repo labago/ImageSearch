@@ -321,74 +321,78 @@ source_dir = "NONE"
 
 for x in range(0, len(sys.argv)):
 
-	if(str(sys.argv[x]) == '-p'):
-		
-		try:
-			pattern = str(sys.argv[x+1])
-		except(IndexError):
-			print >>sys.stderr, 'There was a problem parsing the command line arguments'
-			sys.exit(1)
+	if pattern == "NONE":
+		if(str(sys.argv[x]) == '-p'):
+			
+			try:
+				pattern = str(sys.argv[x+1])
+			except(IndexError):
+				print >>sys.stderr, 'There was a problem parsing the command line arguments'
+				sys.exit(1)
 
 
-		# check if file exists
-		checkExistence(pattern, 'pattern image')
-		
-		#check for unsupported file formats
-		checkFormat(pattern, 'pattern image')
+			# check if file exists
+			checkExistence(pattern, 'pattern image')
+			
+			#check for unsupported file formats
+			checkFormat(pattern, 'pattern image')
 
-	if(str(sys.argv[x]) == '-s'):
+	if source == "NONE":
+		if(str(sys.argv[x]) == '-s'):
 
-		try:
-			source = str(sys.argv[x+1])
-		except(IndexError):
-			print >>sys.stderr, 'There was a problem parsing the command line arguments'
-			sys.exit(1)
+			try:
+				source = str(sys.argv[x+1])
+			except(IndexError):
+				print >>sys.stderr, 'There was a problem parsing the command line arguments'
+				sys.exit(1)
 
-		# check if file exists
-		checkExistence(source, 'source image')
+			# check if file exists
+			checkExistence(source, 'source image')
 
-		# check for unsupported file formats
-		checkFormat(source, 'source image')
+			# check for unsupported file formats
+			checkFormat(source, 'source image')
 
-	if(str(sys.argv[x]) == '-sdir'):
+	if source_dir == "NONE":
+		if(str(sys.argv[x]) == '-sdir'):
 
-		try:
-			source_dir = str(sys.argv[x+1])
-		except(IndexError):
-			print >>sys.stderr, 'There was a problem parsing the command line arguments'
-			sys.exit(1)
+			try:
+				source_dir = str(sys.argv[x+1])
+			except(IndexError):
+				print >>sys.stderr, 'There was a problem parsing the command line arguments'
+				sys.exit(1)
 
-		# check if directory exists
-		checkExistence(source_dir, 'source directory')
+			# check if directory exists
+			checkExistence(source_dir, 'source directory')
 
-		# check for subdirectories and unsupported file formats
-		try:
-			for f in os.listdir(source_dir):
-				checkSubDir(f, 'source directory', source_dir)
-				checkFormat(source_dir+"/"+f, 'source directory')
-		except (OSError):
-			print >>sys.stderr, 'The source directory name is invalid'
-			sys.exit(1)
+			# check for subdirectories and unsupported file formats
+			try:
+				for f in os.listdir(source_dir):
+					checkSubDir(f, 'source directory', source_dir)
+					checkFormat(source_dir+"/"+f, 'source directory')
+			except (OSError, WindowsError):
+				print >>sys.stderr, 'The source directory name is invalid'
+				sys.exit(1)
 
-	if(str(sys.argv[x]) == '-pdir'):
-		
-		try:
-			pattern_dir = str(sys.argv[x+1])
-		except(IndexError):
-			print >>sys.stderr, 'There was a problem parsing the command line arguments'
-			sys.exit(1)
+	if pattern_dir == "NONE":
+		if(str(sys.argv[x]) == '-pdir'):
+			
+			try:
+				pattern_dir = str(sys.argv[x+1])
+			except(IndexError):
+				print >>sys.stderr, 'There was a problem parsing the command line arguments'
+				sys.exit(1)
 
-		# check if directory exists
-		checkExistence(pattern_dir, 'pattern directory')
-		
-		# check for subdirectories and unsupported file formats
-		try:
-			for f in os.listdir(pattern_dir):
-				checkSubDir(f, 'pattern directory', pattern_dir)
-				checkFormat(pattern_dir+"/"+f, 'pattern directory')
-		except (OSError):
-			print >>sys.stderr, 'The pattern directory name is invalid'
-			sys.exit(1)
+			# check if directory exists
+			checkExistence(pattern_dir, 'pattern directory')
+			
+			# check for subdirectories and unsupported file formats
+			try:
+				for f in os.listdir(pattern_dir):
+					checkSubDir(f, 'pattern directory', pattern_dir)
+					checkFormat(pattern_dir+"/"+f, 'pattern directory')
+			except (OSError, WindowsError):
+				print >>sys.stderr, 'The pattern directory name is invalid'
+				sys.exit(1)
 
 # if the command line arguments were set then run the program, otherwise alert the user they did something wrong
 if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_dir != "NONE"):
@@ -415,6 +419,8 @@ if (pattern != "NONE" or pattern_dir != "NONE") and (source != "NONE" or source_
 
 
 	imageSearch = ImageSearch(pattern_array, source_array)
+
+	# match images, print out results
 	imageSearch.match_images()
 else:
 	print >>sys.stderr, 'There was a problem parsing the command line arguments'
