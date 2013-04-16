@@ -73,6 +73,7 @@ class ImageSearch:
   #########################################################
   ### SAD ALGORITHM, ONLY USE ON SMALL IMAGES VERY SLOW ###
   #########################################################
+
 	def SAD(self):
 		xOffset = 0
 		yOffset = 0
@@ -99,7 +100,8 @@ class ImageSearch:
   #########################
   ### END SAD ALGORITHM ###
   #########################
-# try to match these two images based on important pixels
+
+	# try to match these two images based on important pixels
 	def key_point_match(self):
 
 		patternPixels = imageSearch.patternImage.load()
@@ -159,13 +161,12 @@ class ImageSearch:
 					if(percentage >= .3):
 						
 						# this also sets the confidence level self.current_confidence
-						isMatch = self.check_exact_match(xOffset, yOffset)				
+						confidence = self.check_exact_match(xOffset, yOffset)				
 
-						if isMatch == True:
+						if confidence > .5:
 
 							# inverse the confidence to get the real value, then change to percent, trim decimals
-							self.current_confidence = 1 - self.current_confidence
-							self.current_confidence = self.current_confidence * 100
+							self.current_confidence = 100 * confidence
 							confd = int(self.current_confidence)
 
 							# decide whether to add the match to the total array of matches, replace a match, or do not add
@@ -195,26 +196,30 @@ class ImageSearch:
 
 	# checks if this is a duplicate match/over-lapping match
 	def new_or_better_match(self, image_info):
-		for i in range(0, len(self.matches)):
-			# if the pattern and source names are the same we should check if the
-			# if the matched area are over lapping too much (50 percent)
-			if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
-				xOffsetDiff = abs(self.matches[i][3] - image_info[3])
-				yOffsetDiff = abs(self.matches[i][4] - image_info[4])
-				xC = self.matches[i][2][0] - xOffsetDiff
-				yC = self.matches[i][2][1] - yOffsetDiff
-				overlap_area = (xC*yC)+0.0
-				image_area = (self.matches[i][2][0]*self.matches[i][2][1])+0.0
-				percentage_overlap = overlap_area/image_area
-				if(percentage_overlap >= .5):
-					if not self.matches[i][5] > image_info[5]:
-						self.matches[i] = image_info
+		if len(self.matches) > 0:
+			for i in range(0, len(self.matches)):
+				# if the pattern and source names are the same we should check if the
+				# if the matched area are over lapping too much (50 percent)
+				if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
+					xOffsetDiff = abs(self.matches[i][3] - image_info[3])
+					yOffsetDiff = abs(self.matches[i][4] - image_info[4])
+					xC = self.matches[i][2][0] - xOffsetDiff
+					yC = self.matches[i][2][1] - yOffsetDiff
+					overlap_area = (xC*yC)
+					image_area = (self.matches[i][2][0]*self.matches[i][2][1])
+					percentage_overlap = (overlap_area+0.0)/(image_area+0.0)
+					if(percentage_overlap >= .5):
+						if not self.matches[i][5] > image_info[5]:
+							self.matches[i] = image_info
+							return 0
+					else:
+						self.matches.append(image_info)
 						return 0
 				else:
 					self.matches.append(image_info)
-					return 0
-		self.matches.append(image_info)
-		return 0
+		else:
+			self.matches.append(image_info)
+			return 0
 
 	# determines if the pixel is in the picture
 	def is_pixel_in_source(self, pixel, array):
@@ -259,20 +264,21 @@ class ImageSearch:
 		sourceWidth = self.sourceImage.size[0]
 		sourceHeight = self.sourceImage.size[1]
 
-		counter = 0
+		total_pixels = len(self.patPixelArray)
+
+		matched = 0
 		for y in range(0, patternHeigth):
 			for x in range(0, patternWidth):
 				if x + xOffset < sourceWidth and y + yOffset < sourceHeight:
 					patPixel = patternPixels[x, y]
 					sourcePixel = sourcePixels[x + xOffset, y + yOffset]
 					
-					counter += 1
-					if self.check_if_two_pixels_are_equivelant(patPixel, sourcePixel) == False:
-						return False
+					if self.check_if_two_pixels_are_equivelant(patPixel, sourcePixel) == True:
+						matched += 1
 				else:
-					return False
-		self.current_confidence = self.current_confidence/counter
-		return True
+					return 0
+
+		return (matched+0.0)/(total_pixels+0.0)
 
 	# checks pixel equivalency rather than equality, since changing image format will alter pixels
 	def check_if_two_pixels_are_equivelant(self, pixel1, pixel2):
