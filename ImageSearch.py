@@ -83,7 +83,7 @@ class ImageSearch:
 				for y in range(0, self.sourceSize[1]):
 					if y+self.patSize[1] <= self.sourceSize[1]:
 						diff = self.get_SAD_diff(x, y)
-						if diff == 0:
+						if diff < 100:
 							self.new_or_better_match((self.patternName, self.sourceName, self.patSize, x, y, 100))
 
 	def get_SAD_diff(self, xoffset, yoffset):
@@ -172,7 +172,7 @@ class ImageSearch:
 	def new_or_better_match(self, image_info):
 		if len(self.matches) > 0:
 			for i in range(0, len(self.matches)):
-				# if the pattern and source names are the same we should check if the
+				# if the pattern and source names are the same we should check
 				# if the matched area are over lapping too much (50 percent)
 				if self.matches[i][0] == image_info[0] and self.matches[i][1] == image_info[1]:
 					xOffsetDiff = abs(self.matches[i][3] - image_info[3])
